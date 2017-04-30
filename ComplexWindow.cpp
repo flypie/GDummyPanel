@@ -6,7 +6,7 @@
 #ifdef __CYGWIN__
 #include <termios.h>
 #endif
-#include <curses.h>
+#include "curses.h"
 #include "Button.h"
 #include "ComplexWindow.h"
 
@@ -265,8 +265,8 @@ void ComplexWindow::Display()
 
 						GPIOStatus[But->iData] = But->Selected;
 
-						wprintw(Inner, "Mouse: X %d Y %d Id %s\n", event.x, event.y, But->Text);
-						wrefresh(Inner);
+//						wprintw(Inner, "Mouse: X %d Y %d Id %s\n", event.x, event.y, But->Text);
+//						wrefresh(Inner);
 					}
 				}
 			}

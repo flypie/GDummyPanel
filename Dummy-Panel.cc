@@ -33,10 +33,11 @@
 #include <ws2tcpip.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #ifdef __CYGWIN__
 #include <termios.h>
 #endif
-#include <curses.h>
+#include "curses.h"
 #include "Button.h"
 #include "ComplexWindow.h"
 
@@ -329,6 +330,7 @@ int main(int argc, char**argv)
 
 	nodelay(stdscr, TRUE);
     noecho();
+
 	curs_set(0);
 
     if (has_colors())

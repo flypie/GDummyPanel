@@ -6,7 +6,7 @@
 #ifdef __CYGWIN__
 #include <termios.h>
 #endif
-#include <curses.h>
+#include "curses.h"
 #include "Button.h"
 
 Button::Button()
