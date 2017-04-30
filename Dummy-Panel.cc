@@ -37,6 +37,9 @@
 #include <termios.h>
 #endif
 #include <curses.h>
+#include "Button.h"
+#include "ComplexWindow.h"
+
 
 #define BUF_SIZE 255
 #define	DEFAULT_BUFLEN 1024
@@ -107,35 +110,10 @@ char mygetch(void)
 
 #endif
 
-typedef struct _Button
-{
-	int		x, y, w, h;
-	char	*Text;
-	char	*BG;
-	BOOL	Selected;
-	struct	_Button *Next;
-	int		iData;
-	WINDOW	*Win;
-	BOOL	Out;
-} Button;
-
-//Button *ButtonList = 0;
-
-typedef struct
-{
-    WINDOW  *Outer;
-    WINDOW  *Inner;
-
-	Button *ButtonList;
-
-} COMPLEXWINDOW;
-
-COMPLEXWINDOW   *log_win=(COMPLEXWINDOW   *)-1;
-COMPLEXWINDOW   *panel_win=(COMPLEXWINDOW   *)-1;
+ComplexWindow   *log_win=(ComplexWindow   *)-1;
+ComplexWindow   *panel_win=(ComplexWindow   *)-1;
 
 int gstartx, gstarty, gwidth, gheight;
-
-BOOL	NoPanel = TRUE;
 
 short color_table[] =
 {
@@ -143,206 +121,6 @@ short color_table[] =
     COLOR_RED, COLOR_MAGENTA, COLOR_YELLOW, COLOR_WHITE
 };
 
-
-void addbox(COMPLEXWINDOW *local_win)
-{	
-    box(local_win->Outer, 0 , 0);		
-    wrefresh(local_win->Outer);		/* Show that box */
-}
-
-
-void add_button(COMPLEXWINDOW *Win, Button *In)
-{
-	Button	*Cur;
-
-	In->Next = NULL;
-	if(!Win->ButtonList)
-	{
-		Win->ButtonList = In;
-	}
-	else
-	{
-		Cur = Win->ButtonList;
-		while (Cur->Next != 0)
-		{
-			Cur = Cur->Next;
-		};
-		Cur->Next = In;
-	}
-}
-
-Button *find_button(COMPLEXWINDOW *Win, int x,int y)
-{
-	Button	*Cur=NULL;
-	BOOL	NotFound = true;
-
-
-	if (!Win->ButtonList)
-	{
-	}
-	else
-	{
-		Cur = Win->ButtonList;
-
-		if (x >= Cur->x &&
-			y >= Cur->y &&
-			x < Cur->x+Cur->w-1 &&
-			y < Cur->y+Cur->h-1)
-		{
-			NotFound = FALSE;
-		}
-		else
-		{
-			while (Cur->Next != 0 && NotFound)
-			{
-				Cur = Cur->Next;
-				if (x >= Cur->x &&
-					y >= Cur->y &&
-					x < Cur->x + Cur->w - 1 &&
-					y < Cur->y + Cur->h - 1)
-				{
-					NotFound=FALSE;
-				}
-			};
-		}
-	}
-
-	if (NotFound)
-	{
-		Cur = NULL;
-	}
-
-	return Cur;
-}
-
-Button *find_button_data(COMPLEXWINDOW *Win, int data)
-{
-	Button	*Cur = NULL;
-	BOOL	NotFound = true;
-
-
-	if (!Win->ButtonList)
-	{
-	}
-	else
-	{
-		Cur = Win->ButtonList;
-
-		if (data==Cur->iData)
-		{
-			NotFound = FALSE;
-		}
-		else
-		{
-			while (Cur->Next != 0 && NotFound)
-			{
-				Cur = Cur->Next;
-				if (data == Cur->iData)
-				{
-					NotFound = FALSE;
-				}
-			};
-		}
-	}
-
-	if (NotFound)
-	{
-		Cur = NULL;
-	}
-
-	return Cur;
-}
-
-
-
-void draw_button(Button *Cur)
-{
-	if(Cur->Selected)
-	{
-		wattron(Cur->Win, COLOR_PAIR(4) | A_REVERSE);
-	}
-
-	wmove(Cur->Win, 1, 1);
-	wprintw(Cur->Win, Cur->BG);
-
-	wmove(Cur->Win, 1, 1+((Cur->w - 2) - strlen(Cur->Text)) / 2);
-	wprintw(Cur->Win, Cur->Text);
-
-	if (Cur->Selected)
-	{
-		wattroff(Cur->Win, COLOR_PAIR(0) | A_REVERSE);
-	}
-	wrefresh(Cur->Win);
-}
-
-
-COMPLEXWINDOW *create_newwin(int height, int width, int starty, int startx)
-{	
-	COMPLEXWINDOW *local_win=new COMPLEXWINDOW;
-
-	local_win->Outer = newwin(height, width, starty, startx);
-       
-	local_win->Inner = newwin(height-2, width-2, starty+1, startx+1);
-    	wrefresh(local_win->Inner);		/* Show that box 		*/
-    
-	addbox(local_win);
-
-	nodelay(local_win->Outer, TRUE);
-	nodelay(local_win->Inner, TRUE);
-
-	keypad(local_win->Inner, TRUE);
-
-	local_win->ButtonList = NULL;
-
-	return local_win;
-}
-
-void removebox(COMPLEXWINDOW *local_win)
-{	
-	wborder(local_win->Outer, ' ', ' ', ' ',' ',' ',' ',' ',' ');
-	/* The parameters taken are 
-	 * 1. win: the window on which to operate
-	 * 2. ls: character to be used for the left side of the window 
-	 * 3. rs: character to be used for the right side of the window 
-	 * 4. ts: character to be used for the top side of the window 
-	 * 5. bs: character to be used for the bottom side of the window 
-	 * 6. tl: character to be used for the top left corner of the window 
-	 * 7. tr: character to be used for the top right corner of the window 
-	 * 8. bl: character to be used for the bottom left corner of the window 
-	 * 9. br: character to be used for the bottom right corner of the window
-	 */
-
-}
-
-void destroy_win(COMPLEXWINDOW *local_win)
-{	
-	/* box(local_win, ' ', ' '); : This won't produce the desired
-	 * result of erasing the window. It will leave it's four corners 
-	 * and so an ugly remnant of window. 
-	 */
-    
-	wrefresh(local_win->Inner);
-	delwin(local_win->Inner);
-        
-	removebox(local_win);
-    
-	wrefresh(local_win->Outer);
-	delwin(local_win->Outer);
-        
-	delete local_win;
-}
-
-#define wresize resize_window 
-
-void wcomplexresize(COMPLEXWINDOW *win,int height,int width)
-{
-    wresize(win->Outer, height, width);
-    wresize(win->Inner, height-2, width-2);
-    wclear(win->Outer); 
-    addbox(win); 
-    wrefresh(win->Outer);
-    wrefresh(win->Inner);
-}
 
 void    checkandresize()
 {
@@ -357,152 +135,31 @@ void    checkandresize()
 
         wclear(stdscr);
       
-        wcomplexresize(log_win,gheight/2,gwidth);
+		log_win->complexresize(gheight/2,gwidth);
   
-        if(log_win!=(COMPLEXWINDOW *)-1)
+        if(log_win!=(ComplexWindow *)-1)
         {
-            wcomplexresize(log_win,gheight/2,gwidth);
+			log_win->complexresize(gheight/2,gwidth);
 
-            mvwin(log_win->Outer, gheight/2, 0);
-            mvwin(log_win->Inner, gheight/2+1, 0);
+			log_win->mvwin(gheight/2);
         }
-        wprintw(log_win->Inner,"Resize\n");
-
-        wrefresh(log_win->Inner);
-    }
-    else
-    {
-       wrefresh(log_win->Inner);       
+        log_win->printw("Resize\n");
+        log_win->refresh();
     }
 }
 
-typedef struct
-{
-	BOOL LED;
-
-} PANELSTATUS;
-
-PANELSTATUS	Panel;
-
-void DoSpinner()
-{
-	static int count = 0;
-
-	count++;
-
-	wmove(panel_win->Outer,0,0);
-
-	wattron(panel_win->Outer, COLOR_PAIR(count % 8));
-
-	switch (count % 4)
-	{
-	case 0:
-		wprintw(panel_win->Outer, "|");
-		break;
-	case 1:
-		wprintw(panel_win->Outer, "\\");
-		break;
-	case 2:
-		wprintw(panel_win->Outer, "-");
-		break;
-	case 3:
-		wprintw(panel_win->Outer, "/");
-		break;
-	}
-
-	wattroff(panel_win->Outer, COLOR_PAIR(count % 8));
-	wrefresh(panel_win->Outer);
-}
-
-
-void DisplayPanel()
-{
-	MEVENT event;
-	int c;
-	
-	c = wgetch(panel_win->Inner);
-
-	switch (c)
-	{
-		case KEY_MOUSE:
-			if (nc_getmouse(&event) == OK)
-			{	/* When the user clicks left mouse button */
-				if(	event.x>=panel_win->Inner->_begx &&
-					event.y >= panel_win->Inner->_begy &&
-					event.x < panel_win->Inner->_maxx &&
-					event.y < panel_win->Inner->_maxy
-					)
-				{ //We are in the window
-					if (event.bstate & BUTTON1_DOUBLE_CLICKED || event.bstate & BUTTON1_CLICKED)
-					{
-						Button *But;
-						But=find_button(panel_win, event.x, event.y);
-
-						if(But && !But->Out)
-						{
-							But->Selected = !But->Selected;
-							draw_button(But);
-							GPIOStatus[But->iData] = But->Selected;
-							wprintw(log_win->Inner, "Mouse: X %d Y %d Id %s\n", event.x, event.y,But->Text);
-							wrefresh(log_win->Inner);
-						}
-					}
-				}
-				else
-				{
-//					wprintw(log_win->Inner, "Not in WIndow %d\n");
-//					wrefresh(log_win->Inner);
-				}
-			}
-			break;
-		case ERR:
-//			wprintw(log_win->Inner, choice);
-			break;
-
-		default:
-			wprintw(log_win->Inner, "wgetch %d\n", c);
-			wrefresh(log_win->Inner);
-			break;
-
-	}
-
-	wrefresh(panel_win->Inner);
-}
 
 void CreateButtons()
 {
 	for (int i = 0; i < NUMPIPINS; i++)
 	{
-		Button *But = new Button;
-
-		But->iData = i;
-		But->x = 2 + 6 * (i%16);
-		But->y = 1+(i/16)*3;
-		But->h = 3;
-		But->w = 5;
-		But->Out = false;
-
-		But->BG = new char[10]{ "   " };
-		But->Text = new char[10];
-		sprintf_s(But->Text, 10, "%d", i);
-
-
-		But->Selected = GPIOStatus[i];
-		But->Win = newwin(3, 5, But->y, But->x);
-
-		if (But->Out)
-			wattron(But->Win, COLOR_PAIR(4) | A_REVERSE);
-
-		box(But->Win, 0, 0);
-
-		if (But->Out)
-			wattroff(But->Win, COLOR_PAIR(4) | A_REVERSE);
-
-		add_button(panel_win, But);
-		draw_button(But);
+		Button *But = new Button(2 + 6 * (i % 16), 1 + (i / 16) * 3,3,5,i);
+		But->SetSelected(GPIOStatus[i]);
+		panel_win->add_button(But);
+		But->draw();
 	}
 
-wrefresh(panel_win->Inner);
+	panel_win->refresh();
 }
 
 
@@ -526,13 +183,10 @@ DWORD WINAPI SlaveThread(LPVOID lpParam)
     TData = (ThreadData *)lpParam;
     // Receive until the peer shuts down the connection
     
-	NoPanel = FALSE;
-
     checkandresize();    
        
-    wprintw(log_win->Inner,"Slave Thread Started:\n");
-
-    wrefresh(log_win->Inner);
+	log_win->printw("Slave Thread Started:\n");
+	log_win->refresh();
     
     do 
     {
@@ -549,8 +203,9 @@ DWORD WINAPI SlaveThread(LPVOID lpParam)
             {
                     recvbuf[DEFAULT_BUFLEN - 1] = 0;
             }
-            wprintw(log_win->Inner,"Bytes received: %d\n", iResult);
-            wrefresh(log_win->Inner);
+            log_win->printw("Bytes received: %d\n", iResult);
+            log_win->refresh();
+
             CurrentPkt = (CommandPacket *)recvbuf;
 
             for (int i = 0; i < iResult; i += CurrentPkt->Data[PACKETLEN], CurrentPkt = (CommandPacket *)((char *)CurrentPkt+(CurrentPkt->Data[PACKETLEN])))
@@ -570,26 +225,19 @@ DWORD WINAPI SlaveThread(LPVOID lpParam)
 							if (state )
 							{
 								Button *But;
-								But = find_button_data(panel_win, j);
 
+								But = panel_win->find_button_data(j);
 
-								if (!But->Out)
+								if (!But->GetOut())
 								{
-									But->Out = true;
-									
-									wattron(But->Win, COLOR_PAIR(4) | A_REVERSE);
-
-									box(But->Win, 0, 0);
-
-									wattroff(But->Win, COLOR_PAIR(4) | A_REVERSE);
+									But->SetOut(true);
 								}
 
 								if(But)
 								{
-//									But->Out = true;
-									But->Selected = CurrentPkt->Data[6];
-									GPIOStatus[But->iData] = CurrentPkt->Data[6];
-									draw_button(But);
+									But->SetSelected(CurrentPkt->Data[6]!=0);
+									GPIOStatus[But->GetiData()] = CurrentPkt->Data[6];
+									But->draw();
 								}
 							}
 							Data = Data >> 1;
@@ -619,27 +267,27 @@ DWORD WINAPI SlaveThread(LPVOID lpParam)
 
                         send(TData->ClientSocket, (char *)&Send, Send.Data[PACKETLEN], 0);
 
-                        wprintw(log_win->Inner,"Read State received.\n");
+                        log_win->printw("Read State received.\n");
                         break;
 
                     default:
-                        wprintw(log_win->Inner,"Unknown Packet Type\n");
+                        log_win->printw("Unknown Packet Type\n");
                         break;
                 }
             }
-			DisplayPanel();
-			wrefresh(log_win->Inner);
+			panel_win->Display();
+			log_win->refresh();
 		}
         else if (iResult == 0)
         {
-            wprintw(log_win->Inner,"Connection closing...\n");
+            log_win->printw("Connection closing...\n");
         }
         else 
         {
-            wprintw(log_win->Inner,"recv failed with error: %d\n", WSAGetLastError());
+            log_win->printw("recv failed with error: %d\n", WSAGetLastError());
             closesocket(TData->ClientSocket);
         }
-        wrefresh(log_win->Inner);
+        log_win->refresh();
     } while (iResult > 0);
 
 
@@ -647,16 +295,9 @@ DWORD WINAPI SlaveThread(LPVOID lpParam)
     closesocket(TData->ClientSocket);
 
     delete (ThreadData*)lpParam;
-
-//    destroy_win(log_win);
-//    log_win=(COMPLEXWINDOW *)-1;
     
-	NoPanel = TRUE;
-
     return 0;
 }
-
-#define DELAYSIZE 200
 
 
 
@@ -710,29 +351,26 @@ int main(int argc, char**argv)
     starty = gheight / 2;	/* Calculating for a center placement */
     startx = 0;	/* of the window */
 
-    log_win = create_newwin(gheight/2, gwidth, starty, startx);
-    scrollok(log_win->Inner, TRUE);
-
-	panel_win = create_newwin(gheight / 2, gwidth, 0, 0);
-	scrollok(panel_win->Inner, TRUE);
+    log_win = new ComplexWindow(gheight/2, gwidth, starty, startx);
+	panel_win = new ComplexWindow(gheight / 2, gwidth, 0, 0);
 
 	CreateButtons();
 
 	if (has_colors())
     {
-        wprintw(log_win->Inner,"has_colors() = TRUE\n");
+		log_win->printw("has_colors() = TRUE\n");
     }
     else
     {
-        wprintw(log_win->Inner,"has_colors() = FALSE\n");
+		log_win->printw("has_colors() = FALSE\n");
     }
-	wrefresh(log_win->Inner);
+	log_win->refresh();
     
     iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
     
     if (iResult != 0) 
     {
-        wprintw(log_win->Inner,"WSAStartup failed with error: %d\n", iResult);
+		log_win->printw("WSAStartup failed with error: %d\n", iResult);
         EveythingOK=false;
     }
     else
@@ -747,7 +385,7 @@ int main(int argc, char**argv)
         iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
         if (iResult != 0) 
         {
-                wprintw(log_win->Inner,"getaddrinfo failed with error: %d\n", iResult);
+				log_win->printw("getaddrinfo failed with error: %d\n", iResult);
                 EveythingOK=false;                    
         }
         else
@@ -756,7 +394,7 @@ int main(int argc, char**argv)
             ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
             if (ListenSocket == INVALID_SOCKET) 
             {
-                    wprintw(log_win->Inner,"socket failed with error: %ld\n", WSAGetLastError());
+					log_win->printw("socket failed with error: %ld\n", WSAGetLastError());
                     freeaddrinfo(result);
                     EveythingOK=false;                    
             }
@@ -766,8 +404,8 @@ int main(int argc, char**argv)
                 iResult = bind(ListenSocket, result->ai_addr, (int)result->ai_addrlen);
                 if (iResult == SOCKET_ERROR) 
                 {
-                        wprintw(log_win->Inner,"bind failed with error: %d\n", WSAGetLastError());
-                        wrefresh(log_win->Inner);
+						log_win->printw("bind failed with error: %d\n", WSAGetLastError());
+						log_win->refresh();
 
                         freeaddrinfo(result);
                         EveythingOK=false;  
@@ -779,7 +417,7 @@ int main(int argc, char**argv)
                     iResult = listen(ListenSocket, SOMAXCONN);
                     if (iResult == SOCKET_ERROR) 
                     {
-                            wprintw(log_win->Inner,"listen failed with error: %d\n", WSAGetLastError());
+							log_win->printw("listen failed with error: %d\n", WSAGetLastError());
                             EveythingOK=false;                         }
                     else
                     {
@@ -791,8 +429,8 @@ int main(int argc, char**argv)
 						timeout.tv_sec = 0;
 						timeout.tv_usec = 20000;
 
-						wprintw(log_win->Inner, "About to Wait:\n");
-						wrefresh(log_win->Inner);
+						log_win->printw("About to Wait:\n");
+						log_win->refresh();
 
 						for (;EveythingOK;)
                         {
@@ -804,26 +442,26 @@ int main(int argc, char**argv)
 							rv = select(0, &set, NULL, NULL, &timeout);
 							if (rv == -1)
 							{
-								wprintw(log_win->Inner, "Select Error %d\n",rv); /* an error accured */
+								log_win->printw("Select Error %d\n",rv); /* an error accured */
 								EveythingOK = false;
 							}
 							else if (rv == 0)
 							{
 								/* a timeout occured */
-								DoSpinner();
-								DisplayPanel();
+								log_win->DoSpinner();
+								panel_win->Display();
 							}
 							else
 							{
-								wprintw(log_win->Inner,"About to Call Accept:\n");
-		                        wrefresh(log_win->Inner);
+								log_win->printw("About to Call Accept:\n");
+								log_win->refresh();
 
 								// Accept a client socket
 								Data->ClientSocket = accept(ListenSocket, NULL, NULL);
 
 								if (Data->ClientSocket == INVALID_SOCKET)
 								{
-                                    wprintw(log_win->Inner,"accept failed with error: %d\n", WSAGetLastError());
+									log_win->printw("accept failed with error: %d\n", WSAGetLastError());
                                     EveythingOK=false;  
 								}
 								else
@@ -836,8 +474,8 @@ int main(int argc, char**argv)
 										0,                      // use default creation flags 
 										&ThreadId);             // returns the thread identifier
 								}
-								wprintw(log_win->Inner, "About to Wait:\n");
-								wrefresh(log_win->Inner);
+								log_win->printw("About to Wait:\n");
+								log_win->refresh();
 							}
                         }
                     }
@@ -852,8 +490,8 @@ int main(int argc, char**argv)
 
     if(!EveythingOK)
     {
-        wprintw(log_win->Inner,"Press  any key to exit\n");
-        wrefresh(log_win->Inner);
+		log_win->printw("Press  any key to exit\n");
+		log_win->refresh();
 #ifdef __CYGWIN__
         mygetch();
 #else
@@ -861,7 +499,7 @@ int main(int argc, char**argv)
 #endif
     }
 
-    destroy_win(log_win);
+    delete log_win;
     
     endwin();			/* End curses mode		  */
         
