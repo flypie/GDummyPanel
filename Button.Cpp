@@ -34,7 +34,7 @@ Button::Button(int inx, int  iny, int  inh, int  inw, int  ini)
 
 	sprintf_s(Text, 10, "%d", iData);
 
-	Win = newwin(h, w, y,x);
+	Win = newwin(h, w, y, x);
 
 }
 
@@ -61,7 +61,7 @@ void Button::draw()
 
 void Button::SetSelected(BOOLEAN In)
 {
-	Selected =In;
+	Selected = In;
 }
 
 

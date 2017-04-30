@@ -13,7 +13,6 @@ public:
 	Button	*find_button(int x, int y);
 	Button	*find_button_data(int data);
 	void	removebox();
-	void	destroy_win();
 	void	complexresize(int height, int width);
 	void	mvwin(int height);
 	void	DoSpinner();
@@ -21,7 +20,6 @@ public:
 	void	Display();
 	void	refresh();
 	void	printw(const char *, ...);
-
 
 private:
 	WINDOW  *Outer;

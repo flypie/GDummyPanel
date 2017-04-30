@@ -110,3 +110,7 @@ x64/Debug/vc141.idb
 x64/Debug/vc141.pdb
 
 Makefile
+
+.vs/GDummyPanel/v15/ipch/AutoPCH/GDUMMYPANEL-9ed5380c/DUMMY-PANEL-428ac5ae/DUMMY-PANEL.ipch
+
+.vs/GDummyPanel/v15/ipch/AutoPCH/GDUMMYPANEL-9ed5380c/DUMMYPANEL-281406c1/DUMMYPANEL.ipch

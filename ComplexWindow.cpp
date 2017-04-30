@@ -9,7 +9,7 @@
 #include "curses.h"
 #include "Button.h"
 #include "ComplexWindow.h"
-
+#include "Dummy-Panel.h"
 
 extern BOOL	GPIOStatus[];
 
@@ -66,7 +66,6 @@ void ComplexWindow::add_button(Button *In)
 {
 	Button	*Cur;
 
-
 	if (!ButtonList)
 	{
 		ButtonList = In;
@@ -86,7 +85,6 @@ Button *ComplexWindow::find_button(int x, int y)
 {
 	Button	*Cur = NULL;
 	BOOL	NotFound = true;
-
 
 	if (!ButtonList)
 	{
@@ -114,7 +112,7 @@ Button *ComplexWindow::find_button(int x, int y)
 				{
 					NotFound = FALSE;
 				}
-			};
+			}
 		}
 	}
 
@@ -152,7 +150,7 @@ Button *ComplexWindow::find_button_data(int data)
 				{
 					NotFound = FALSE;
 				}
-			};
+			}
 		}
 	}
 
@@ -233,8 +231,6 @@ int ComplexWindow::_getch()
 	return wgetch(Inner);
 }
 
-
-
 void ComplexWindow::Display()
 {
 	MEVENT event;
@@ -265,30 +261,27 @@ void ComplexWindow::Display()
 
 						GPIOStatus[But->iData] = But->Selected;
 
-//						wprintw(Inner, "Mouse: X %d Y %d Id %s\n", event.x, event.y, But->Text);
-//						wrefresh(Inner);
+						log_win->printw("Mouse: X %d Y %d Id %s\n", event.x, event.y, But->Text);
+						log_win->refresh();
 					}
 				}
 			}
 			else
 			{
-				//					wprintw(log_win->Inner, "Not in WIndow %d\n");
-				//					wrefresh(log_win->Inner);
+				log_win->printw("Not in WIndow %d\n");
+				log_win->refresh();
 			}
 		}
 		break;
 	case ERR:
-		//			wprintw(log_win->Inner, choice);
+		//		wprintw(log_win->Inner, choice);
 		break;
 
 	default:
-//		wprintw(log_win->Inner, "wgetch %d\n", c);
-//		wrefresh(log_win->Inner);
+		//		wprintw(log_win->Inner, "wgetch %d\n", c);
+		//		wrefresh(log_win->Inner);
 		break;
-
 	}
-
-//	wrefresh(panel_win->Inner);
 }
 
 void ComplexWindow::refresh()
