@@ -1,20 +1,30 @@
+#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#include <unistd.h>
+#endif
 
-#include <winsock2.h>
-#include <ws2tcpip.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
 #ifdef __CYGWIN__
 #include <termios.h>
 #endif
+
 #include "curses.h"
+
+#include "Fudge.h"
+
+
 #include "Button.h"
+
 
 Button::Button()
 {
 	Next = NULL;
 	Out = false;
 
-	BG = new char[10]{ "   " };
+	BG = new char[10];
+	strcpy(BG, "  ");
 	Text = new char[10];
 }
 
@@ -23,7 +33,8 @@ Button::Button(int inx, int  iny, int  inh, int  inw, int  ini)
 	Next = NULL;
 	Out = false;
 
-	BG = new char[10]{ "   " };
+	BG = new char[10];
+	strcpy(BG, "  ");
 	Text = new char[10];
 
 	x = inx;
@@ -31,10 +42,11 @@ Button::Button(int inx, int  iny, int  inh, int  inw, int  ini)
 	h = inh;
 	w = inw;
 	iData = ini;
-
-	sprintf_s(Text, 10, "%d", iData);
-
 	Win = newwin(h, w, y, x);
+
+	box(Win, 0, 0);
+
+	snprintf(Text, 10, "%d", iData);
 
 }
 
@@ -59,13 +71,13 @@ void Button::draw()
 }
 
 
-void Button::SetSelected(BOOLEAN In)
+void Button::SetSelected(bool In)
 {
 	Selected = In;
 }
 
 
-void Button::SetOut(BOOLEAN In)
+void Button::SetOut(bool In)
 {
 	Out = In;
 
@@ -74,17 +86,17 @@ void Button::SetOut(BOOLEAN In)
 	wattroff(Win, COLOR_PAIR(4) | A_REVERSE);
 }
 
-BOOLEAN Button::GetOut()
+bool Button::GetOut()
 {
 	return Out;
 }
 
-BOOLEAN Button::GetSelected()
+bool Button::GetSelected()
 {
 	return Selected;
 }
 
-int		Button::GetiData()
+int Button::GetiData()
 {
 	return iData;
 }

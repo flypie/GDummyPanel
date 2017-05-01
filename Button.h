@@ -11,11 +11,11 @@ public:
 
 
 	void draw();
-	void SetSelected(BOOLEAN In);
-	void SetOut(BOOLEAN In);
+	void SetSelected(bool In);
+	void SetOut(bool In);
 
-	BOOLEAN GetSelected();
-	BOOLEAN GetOut();
+	bool GetSelected();
+	bool GetOut();
 	int		GetiData();
 
 private:
@@ -23,11 +23,11 @@ private:
 	int		x, y, w, h;
 	char	*Text;
 	char	*BG;
-	BOOL	Selected;
+	bool	Selected;
 	Button *Next;
 	int		iData;
 	WINDOW	*Win;
-	BOOL	Out;
+	bool	Out;
 };
 
 

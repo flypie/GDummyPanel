@@ -28,25 +28,52 @@
   * include/qemu/PanelEmu.h
   */
 
+#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#include <unistd.h>
+#endif
 
+#ifdef _POSIX_VERSION
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <errno.h>
+#include <strings.h>
+#else
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
-#ifdef __CYGWIN__
+
+#ifdef _POSIX_VERSION
+#include <pthread.h>
 #include <termios.h>
 #else
+#include <process.h>
 #include <conio.h>
 #endif
+
 #include "curses.h"
+
+#include "Fudge.h"
+
 #include "Button.h"
 #include "ComplexWindow.h"
 
+bool    GlobalExit = false;
 
 #define BUF_SIZE 255
 #define	DEFAULT_BUFLEN 1024
+
+#ifdef _POSIX_VERSION
+#define DEFAULT_PORT 45567
+#else
 #define DEFAULT_PORT "45567"
+#endif
 
 typedef struct
 {
@@ -73,8 +100,8 @@ typedef struct
 
 
 #define NUMPIPINS	54
-
-BOOL	GPIOStatus[NUMPIPINS] = { 0 };
+#define LOGWINHEIGHT    10
+bool	GPIOStatus[NUMPIPINS] = { 0 };
 
 ComplexWindow   *log_win = (ComplexWindow   *)-1;
 static ComplexWindow   *panel_win = (ComplexWindow   *)-1;
@@ -88,8 +115,7 @@ short color_table[] =
 };
 
 
-
-#ifdef __CYGWIN__
+#ifdef _POSIX_VERSION
 static struct termios oldc, newc;
 
 /* Initialize newc terminal i/o settings */
@@ -123,10 +149,7 @@ char mygetch(void)
 {
 	return mygetch_(0);
 }
-
 #endif
-
-
 
 void    checkandresize()
 {
@@ -154,12 +177,15 @@ void    checkandresize()
 	}
 }
 
+#define MYBUTTONWIDTH 5
+#define MYBUTTONHEIGHT 3
+#define BUTTONSPERROW  10
 
 void CreateButtons()
 {
 	for (int i = 0; i < NUMPIPINS; i++)
 	{
-		Button *But = new Button(2 + 6 * (i % 16), 1 + (i / 16) * 3, 3, 5, i);
+		Button *But = new Button(1 + MYBUTTONWIDTH * (i % BUTTONSPERROW), 1 + (i / BUTTONSPERROW) * MYBUTTONHEIGHT, MYBUTTONHEIGHT, MYBUTTONWIDTH, i);
 		But->SetSelected(GPIOStatus[i]);
 		panel_win->add_button(But);
 		But->draw();
@@ -169,7 +195,7 @@ void CreateButtons()
 }
 
 
-DWORD WINAPI SlaveThread(LPVOID lpParam)
+DWORD SlaveThread(void *lpParam)
 {
 	ThreadData *TData;
 
@@ -294,8 +320,7 @@ DWORD WINAPI SlaveThread(LPVOID lpParam)
 			closesocket(TData->ClientSocket);
 		}
 		log_win->refresh();
-	} while (iResult > 0);
-
+	} while (iResult > 0 && !GlobalExit);
 
 	// cleanup
 	closesocket(TData->ClientSocket);
@@ -308,25 +333,33 @@ DWORD WINAPI SlaveThread(LPVOID lpParam)
 	return 0;
 }
 
-
-
 int main(int argc, char**argv)
 {
 	int i;
 
+#ifndef _POSIX_VERSION        
 	WSADATA wsaData;
+#endif
 	int     iResult;
-	BOOL    EveythingOK = true;
+	bool    EveythingOK = true;
 
 	SOCKET  ListenSocket = INVALID_SOCKET;
 
+#ifdef _POSIX_VERSION
+	struct  sockaddr_in *result = NULL;
+	struct  sockaddr_in hints;
+#else
 	struct  addrinfo *result = NULL;
 	struct  addrinfo hints;
-
+#endif
 	HANDLE  hThread;
-	DWORD   ThreadId;
 
-	int     startx, starty;
+#ifdef _POSIX_VERSION
+	pthread_t *ThreadId;
+#else        
+	DWORD   ThreadId;
+#endif
+
 	WINDOW	*Master;
 
 #ifdef XCURSES
@@ -354,20 +387,14 @@ int main(int argc, char**argv)
 			init_pair(i, color_table[i], COLOR_BLACK);
 		}
 
-		/* Resize the terminal to something larger than the physical screen */
-		resize_term(2000, 2000);
+		int BWindowHeight = (MYBUTTONHEIGHT + (MYBUTTONHEIGHT*NUMPIPINS / BUTTONSPERROW)) + 1;
+
+		resize_term(BWindowHeight + LOGWINHEIGHT, BUTTONSPERROW * MYBUTTONWIDTH + 4);
 
 		getmaxyx(stdscr, gheight, gwidth);		/* get the number of rows and columns */
 
-		resize_term(gheight / 2, 16 * 6 + 3);
-
-		getmaxyx(stdscr, gheight, gwidth);		/* get the number of rows and columns */
-
-		starty = gheight / 2;	/* Calculating for a center placement */
-		startx = 0;	/* of the window */
-
-		log_win = new ComplexWindow(gheight / 2, gwidth, starty, startx);
-		panel_win = new ComplexWindow(gheight / 2, gwidth, 0, 0);
+		panel_win = new ComplexWindow(BWindowHeight, gwidth, 0, 0);
+		log_win = new ComplexWindow(LOGWINHEIGHT, gwidth, BWindowHeight, 0);
 
 		if (log_win&&panel_win)
 		{
@@ -375,38 +402,61 @@ int main(int argc, char**argv)
 
 			if (has_colors())
 			{
-				log_win->printw("has_colors() = TRUE\n");
+				log_win->printw("has_colours() = TRUE\n");
 			}
 			else
 			{
-				log_win->printw("has_colors() = FALSE\n");
+				log_win->printw("has_colours() = FALSE\n");
 			}
+			log_win->printw("Presss 'X' to exit\n");
+
 			log_win->refresh();
 
+#ifdef _POSIX_VERSION 
+			iResult = 0;
+#else
 			iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+#endif
 
 			if (iResult == 0)
 			{
+#ifdef _POSIX_VERSION                      
+				hints.sin_family = AF_INET;
+				hints.sin_port = htons(DEFAULT_PORT);
+				hints.sin_addr.s_addr = INADDR_ANY;
+				bzero(&(hints.sin_zero), 8);
+				iResult = 0;
+#else
 				ZeroMemory(&hints, sizeof(hints));
+
 				hints.ai_family = AF_INET;
 				hints.ai_socktype = SOCK_STREAM;
 				hints.ai_protocol = IPPROTO_TCP;
 				hints.ai_flags = AI_PASSIVE;
-
 				// Resolve the server address and port
 				iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
+#endif
 				if (iResult == 0)
 				{
-					// Create a SOCKET for connecting to server
+#ifdef _POSIX_VERSION                            
+					ListenSocket = socket(AF_INET, SOCK_STREAM, 0);
+#else  
 					ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+#endif
 					if (ListenSocket != INVALID_SOCKET)
 					{
 						// Setup the TCP listening socket
+#ifdef _POSIX_VERSION                                                               
+						iResult = bind(ListenSocket, (struct sockaddr *)&hints, sizeof(struct sockaddr));
+#else
 						iResult = bind(ListenSocket, result->ai_addr, (int)result->ai_addrlen);
+#endif
 						if (iResult != SOCKET_ERROR)
 						{
+#ifdef _POSIX_VERSION                                                               
+#else
 							freeaddrinfo(result);
-
+#endif
 							iResult = listen(ListenSocket, SOMAXCONN);
 							if (iResult != SOCKET_ERROR)
 							{
@@ -420,14 +470,14 @@ int main(int argc, char**argv)
 								log_win->printw("About to Wait:\n");
 								log_win->refresh();
 
-								for (; EveythingOK;)
+								for (; EveythingOK && !GlobalExit;)
 								{
 									ThreadData *Data = new ThreadData;
 
 									FD_ZERO(&set); /* clear the set */
 									FD_SET(ListenSocket, &set); /* add our file descriptor to the set */
 
-									rv = select(0, &set, NULL, NULL, &timeout);
+									rv = select(0, &set, NULL, NULL, (timeval *)&timeout);
 									if (rv == 0)
 									{
 										/* a timeout occured */
@@ -444,6 +494,9 @@ int main(int argc, char**argv)
 
 										if (Data->ClientSocket != INVALID_SOCKET)
 										{
+#ifdef _POSIX_VERSION
+											hThread = pthread_create(ThreadId, NULL, (void* (*)(void*))SlaveThread, Data);
+#else
 											hThread = CreateThread(
 												NULL,                   // default security attributes
 												0,                      // use default stack size  
@@ -451,7 +504,7 @@ int main(int argc, char**argv)
 												Data,                   // argument to thread function 
 												0,                      // use default creation flags 
 												&ThreadId);             // returns the thread identifier
-
+#endif
 											log_win->printw("About to Wait:\n");
 											log_win->refresh();
 										}
@@ -486,15 +539,16 @@ int main(int argc, char**argv)
 					{
 						log_win->printw("socket failed with error: %ld\n", WSAGetLastError());
 						EveythingOK = false;
-					}
-					freeaddrinfo(result);
+					}                                    
 				}
 				else
 				{
 					log_win->printw("getaddrinfo failed with error: %d\n", iResult);
 					EveythingOK = false;
 				}
+#ifdef __WINDOWS__                                
 				WSACleanup();
+#endif			
 			}
 			else
 			{
@@ -506,11 +560,7 @@ int main(int argc, char**argv)
 			{
 				log_win->printw("Press any key to exit\n");
 				log_win->refresh();
-			}
-
-			if (!EveythingOK)
-			{
-#ifdef __CYGWIN__
+#ifdef _POSIX_VERSION
 				mygetch();
 #else
 				_getch();
@@ -525,7 +575,7 @@ int main(int argc, char**argv)
 			EveythingOK = false;
 			printf("Complex WIndow Creation failed\n");
 			printf("Press any key to exit\n");
-#ifdef __CYGWIN__
+#ifdef _POSIX_VERSION
 			mygetch();
 #else
 			_getch();
@@ -539,7 +589,7 @@ int main(int argc, char**argv)
 		EveythingOK = false;
 		printf("initscr failed\n");
 		printf("Press any key to exit\n");
-#ifdef __CYGWIN__
+#ifdef _POSIX_VERSION
 		mygetch();
 #else
 		_getch();

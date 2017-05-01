@@ -16,7 +16,7 @@ public:
 	void	complexresize(int height, int width);
 	void	mvwin(int height);
 	void	DoSpinner();
-	int		_getch();
+	int     _getch();
 	void	Display();
 	void	refresh();
 	void	printw(const char *, ...);
@@ -26,5 +26,4 @@ private:
 	WINDOW  *Inner;
 
 	Button *ButtonList;
-
 };

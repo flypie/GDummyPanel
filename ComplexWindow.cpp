@@ -1,26 +1,31 @@
 
-#include <winsock2.h>
-#include <ws2tcpip.h>
+#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#include <unistd.h>
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #ifdef __CYGWIN__
 #include <termios.h>
 #endif
+
+#define NCURSES_INTERNALS 1 //Need to see some of the internals.
+
 #include "curses.h"
+
+#include "Fudge.h"
+
 #include "Button.h"
 #include "ComplexWindow.h"
 #include "Dummy-Panel.h"
 
-extern BOOL	GPIOStatus[];
-
+extern bool	GPIOStatus[];
 
 ComplexWindow::ComplexWindow(int height, int width, int starty, int startx)
 {
-	//	ComplexWindow *local_win=new ComplexWindow;
-
 	Outer = newwin(height, width, starty, startx);
 
-	Inner = newwin(height - 2, width - 2, starty + 1, startx + 1);
+	Inner = newwin(height - 3, width - 2, starty + 1, startx + 1);
 	wrefresh(Inner);		/* Show that box 		*/
 
 	addbox();
@@ -33,7 +38,6 @@ ComplexWindow::ComplexWindow(int height, int width, int starty, int startx)
 	ButtonList = NULL;
 
 	scrollok(Inner, TRUE);
-
 }
 
 ComplexWindow::~ComplexWindow()
@@ -84,7 +88,7 @@ void ComplexWindow::add_button(Button *In)
 Button *ComplexWindow::find_button(int x, int y)
 {
 	Button	*Cur = NULL;
-	BOOL	NotFound = true;
+	bool	NotFound = true;
 
 	if (!ButtonList)
 	{
@@ -127,7 +131,7 @@ Button *ComplexWindow::find_button(int x, int y)
 Button *ComplexWindow::find_button_data(int data)
 {
 	Button	*Cur = NULL;
-	BOOL	NotFound = true;
+	bool	NotFound = true;
 
 
 	if (!ButtonList)
@@ -241,7 +245,11 @@ void ComplexWindow::Display()
 	switch (c)
 	{
 	case KEY_MOUSE:
+#ifdef _POSIX_VERSION
+		if (getmouse(&event) == OK)
+#else
 		if (nc_getmouse(&event) == OK)
+#endif                
 		{	/* When the user clicks left mouse button */
 			if (event.x >= Inner->_begx &&
 				event.y >= Inner->_begy &&
@@ -268,18 +276,22 @@ void ComplexWindow::Display()
 			}
 			else
 			{
-				log_win->printw("Not in WIndow %d\n");
+				log_win->printw("Not in WIndow\n");
 				log_win->refresh();
 			}
 		}
+		break;
+	case 'X':
+	case 'x':
+		log_win->printw("KEY_CODE_YES\n");
+		log_win->refresh();
+		GlobalExit = true;
 		break;
 	case ERR:
 		//		wprintw(log_win->Inner, choice);
 		break;
 
 	default:
-		//		wprintw(log_win->Inner, "wgetch %d\n", c);
-		//		wrefresh(log_win->Inner);
 		break;
 	}
 }

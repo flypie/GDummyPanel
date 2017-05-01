@@ -9,5 +9,8 @@
 
 extern	ComplexWindow   *log_win;
 
+extern  bool    GlobalExit;
+
+
 #endif	/* _welcome_H */
 
