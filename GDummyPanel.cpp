@@ -151,6 +151,11 @@ char mygetch(void)
 }
 #endif
 
+#define MYBUTTONWIDTH 5
+#define MYBUTTONHEIGHT 3
+#define BUTTONSPERROW  10
+#define BUTTONWINDOWHEIGHT (MYBUTTONHEIGHT + (MYBUTTONHEIGHT*NUMPIPINS / BUTTONSPERROW)) + 1
+
 void    checkandresize()
 {
 	int width, height;
@@ -164,22 +169,16 @@ void    checkandresize()
 
 		wclear(stdscr);
 
-		log_win->complexresize(gheight / 2, gwidth);
-
-		if (log_win != (ComplexWindow *)-1)
-		{
-			log_win->complexresize(gheight / 2, gwidth);
-
-			log_win->mvwin(gheight / 2);
-		}
+		panel_win->complexresize(BUTTONWINDOWHEIGHT, gwidth);
+		log_win->complexresize(gheight-BUTTONWINDOWHEIGHT, gwidth);
+		log_win->mvwin(BUTTONWINDOWHEIGHT);
+		
 		log_win->printw("Resize\n");
 		log_win->refresh();
 	}
 }
 
-#define MYBUTTONWIDTH 5
-#define MYBUTTONHEIGHT 3
-#define BUTTONSPERROW  10
+
 
 void CreateButtons()
 {
@@ -387,14 +386,14 @@ int main(int argc, char**argv)
 			init_pair(i, color_table[i], COLOR_BLACK);
 		}
 
-		int BWindowHeight = (MYBUTTONHEIGHT + (MYBUTTONHEIGHT*NUMPIPINS / BUTTONSPERROW)) + 1;
 
-		resize_term(BWindowHeight + LOGWINHEIGHT, BUTTONSPERROW * MYBUTTONWIDTH + 4);
+
+		resize_term(BUTTONWINDOWHEIGHT + LOGWINHEIGHT, BUTTONSPERROW * MYBUTTONWIDTH + 2);
 
 		getmaxyx(stdscr, gheight, gwidth);		/* get the number of rows and columns */
 
-		panel_win = new ComplexWindow(BWindowHeight, gwidth, 0, 0);
-		log_win = new ComplexWindow(LOGWINHEIGHT, gwidth, BWindowHeight, 0);
+		panel_win = new ComplexWindow(BUTTONWINDOWHEIGHT, gwidth, 0, 0);
+		log_win = new ComplexWindow(LOGWINHEIGHT, gwidth, BUTTONWINDOWHEIGHT, 0);
 
 		if (log_win&&panel_win)
 		{
@@ -516,8 +515,11 @@ int main(int argc, char**argv)
 									}
 									else
 									{
-										log_win->printw("Select Error %d\n", rv); /* an error accured */
-										EveythingOK = false;
+										if(WSAGetLastError()!=EINTR)
+										{
+	                                        log_win->printw("Select Error %d\n", WSAGetLastError()); /* an error accured */
+											EveythingOK = false;
+										}
 									}
 								}
 							}

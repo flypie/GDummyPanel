@@ -4,6 +4,7 @@
         <activeConfTypeElem>1</activeConfTypeElem>
         <activeConfIndexElem>0</activeConfIndexElem>
     </data>
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/cygwin64/home/John-Bradley/GDummyPanel/Button.cpp</file>
@@ -12,6 +13,7 @@
             <file>file:/C:/cygwin64/home/John-Bradley/GDummyPanel/.gitignore</file>
             <file>file:/C:/cygwin64/home/John-Bradley/GDummyPanel/ComplexWindow.h</file>
             <file>file:/C:/cygwin64/home/John-Bradley/GDummyPanel/ComplexWindow.cpp</file>
+            <file>file:/C:/cygwin64/home/John-Bradley/GDummyPanel/GDummyPanel.cpp</file>
         </group>
     </open-files>
 </project-private>

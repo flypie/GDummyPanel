@@ -138,3 +138,5 @@ GDummyPanelCygwin/dist/Debug/Cygwin-Windows/gdummypanelcygwin.exe
 GDummyPanelLinux/dist/Debug/GNU-Linux/gdummypanellinux
 
 GDummyPanelCygwin/nbproject/private/private.xml
+
+x64/Debug/GDummyPanel.obj
