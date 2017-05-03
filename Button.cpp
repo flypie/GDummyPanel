@@ -1,3 +1,17 @@
+/*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+* THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 #include <unistd.h>
 #endif
@@ -13,8 +27,6 @@
 #include "curses.h"
 
 #include "Fudge.h"
-
-
 #include "Button.h"
 
 
@@ -32,6 +44,7 @@ Button::Button(int inx, int  iny, int  inh, int  inw, int  ini)
 {
 	Next = NULL;
 	Out = false;
+	In = false;
 
 	BG = new char[10];
 	strcpy(BG, "  ");
@@ -46,7 +59,7 @@ Button::Button(int inx, int  iny, int  inh, int  inw, int  ini)
 
 	box(Win, 0, 0);
 
-	snprintf(Text, 10, "%d", iData);
+	snprintf(Text, 10, "%03d", iData);
 
 }
 
@@ -54,7 +67,14 @@ void Button::draw()
 {
 	if (Selected)
 	{
-		wattron(Win, COLOR_PAIR(4) | A_REVERSE);
+		if (Out)
+		{
+			wattron(Win, COLOR_PAIR(4) | A_REVERSE);
+		}
+		else
+		{
+			wattron(Win, COLOR_PAIR(2) | A_REVERSE);
+		}
 	}
 
 	wmove(Win, 1, 1);
@@ -65,8 +85,11 @@ void Button::draw()
 
 	if (Selected)
 	{
-		wattroff(Win, COLOR_PAIR(0) | A_REVERSE);
+		wattroff(Win, A_REVERSE);
 	}
+
+	wattron(Win, COLOR_PAIR(7));
+
 	wrefresh(Win);
 }
 
@@ -85,6 +108,16 @@ void Button::SetOut(bool In)
 	box(Win, 0, 0);
 	wattroff(Win, COLOR_PAIR(4) | A_REVERSE);
 }
+
+void Button::SetIn(bool InIn)
+{
+	In = InIn;
+
+	wattron(Win, COLOR_PAIR(2) | A_REVERSE);
+	box(Win, 0, 0);
+	wattroff(Win, COLOR_PAIR(2) | A_REVERSE);
+}
+
 
 bool Button::GetOut()
 {

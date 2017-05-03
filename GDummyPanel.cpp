@@ -63,8 +63,7 @@
 
 #include "Button.h"
 #include "ComplexWindow.h"
-
-bool    GlobalExit = false;
+#include "GPIO.h"
 
 #define BUF_SIZE 255
 #define	DEFAULT_BUFLEN 1024
@@ -75,7 +74,20 @@ bool    GlobalExit = false;
 #define DEFAULT_PORT "45567"
 #endif
 
-typedef struct
+#define NUMPIPINS	54
+#define LOGWINHEIGHT    10
+
+#define MYBUTTONWIDTH 5
+#define MYBUTTONHEIGHT 3
+#define BUTTONSPERROW  10
+#define BUTTONWINDOWHEIGHT (MYBUTTONHEIGHT + (MYBUTTONHEIGHT*NUMPIPINS / BUTTONSPERROW)) + 1
+
+#define MAXPACKET   255
+
+#define PACKETLEN   0  //Includes Packet Length
+#define PACKETTYPE  1
+
+typedef struct ThreadDataT
 {
 	SOCKET ClientSocket;
 } ThreadData;
@@ -88,25 +100,20 @@ typedef enum
 	READRESPONSE = 3
 } PacketType;
 
-#define MAXPACKET   255
-
-#define PACKETLEN   0  //Includes Packet Length
-#define PACKETTYPE  1
 
 typedef struct
 {
 	unsigned short int Data[MAXPACKET];
 } CommandPacket;
 
+bool    GlobalExit = false;
 
-#define NUMPIPINS	54
-#define LOGWINHEIGHT    10
-bool	GPIOStatus[NUMPIPINS] = { 0 };
+GPIO *GPIOs;
 
 ComplexWindow   *log_win = (ComplexWindow   *)-1;
 static ComplexWindow   *panel_win = (ComplexWindow   *)-1;
 
-int gstartx, gstarty, gwidth, gheight;
+static int gwidth, gheight;
 
 short color_table[] =
 {
@@ -151,10 +158,6 @@ char mygetch(void)
 }
 #endif
 
-#define MYBUTTONWIDTH 5
-#define MYBUTTONHEIGHT 3
-#define BUTTONSPERROW  10
-#define BUTTONWINDOWHEIGHT (MYBUTTONHEIGHT + (MYBUTTONHEIGHT*NUMPIPINS / BUTTONSPERROW)) + 1
 
 void    checkandresize()
 {
@@ -179,18 +182,84 @@ void    checkandresize()
 }
 
 
-
 void CreateButtons()
 {
 	for (int i = 0; i < NUMPIPINS; i++)
 	{
 		Button *But = new Button(1 + MYBUTTONWIDTH * (i % BUTTONSPERROW), 1 + (i / BUTTONSPERROW) * MYBUTTONHEIGHT, MYBUTTONHEIGHT, MYBUTTONWIDTH, i);
-		But->SetSelected(GPIOStatus[i]);
+		But->SetSelected(GPIOs->GetStatus(i));
 		panel_win->add_button(But);
 		But->draw();
 	}
 
 	panel_win->refresh();
+}
+
+void SendPinStates(ThreadData *TData)
+{
+	uint64_t Data;
+	uint64_t state;
+
+	CommandPacket	Send;
+	Data = 0;
+
+	for (int j = 0; j < NUMPIPINS; j++)
+	{
+		Data = Data << 1;
+		if (GPIOs->GetStatus(NUMPIPINS - 1 - j))
+		{
+			Data |= 0x01;
+		}
+	}
+
+	GPIOs->Sent();
+
+	Send.Data[2] = (unsigned short)Data;
+	Send.Data[3] = (unsigned short)(Data >> 16);
+	Send.Data[4] = (unsigned short)(Data >> 32);
+	Send.Data[5] = (unsigned short)(Data >> 48);
+
+	Send.Data[PACKETLEN] = sizeof(Send.Data[0]) * 6;
+	Send.Data[PACKETTYPE] = READRESPONSE;
+
+	send(TData->ClientSocket, (char *)&Send, Send.Data[PACKETLEN], 0);
+
+	log_win->printw("Pin States Sent.\n");
+}
+
+void SetPinStates(ThreadData *TData, CommandPacket	*CurrentPkt,bool FromPanel)
+{
+	uint64_t Data;
+	uint64_t state;
+
+	CommandPacket	Send;
+	
+	Data = (uint64_t)CurrentPkt->Data[2] | (uint64_t)CurrentPkt->Data[3] << 16 | (uint64_t)CurrentPkt->Data[4] << 32 | (uint64_t)CurrentPkt->Data[5] << 48;
+
+	for (int j = 0; j < NUMPIPINS && Data; j++)
+	{
+		state = Data & 0x1;
+
+		if (state)
+		{
+			Button *But;
+
+			But = panel_win->find_button_data(j);
+
+			if (!But->GetOut())
+			{
+				But->SetOut(true);
+			}
+
+			if (But)
+			{
+				But->SetSelected(CurrentPkt->Data[6] != 0);
+				GPIOs->SetStatus(But->GetiData(),CurrentPkt->Data[6], FromPanel);
+				But->draw();
+			}
+		}
+		Data = Data >> 1;
+	}
 }
 
 
@@ -204,15 +273,14 @@ DWORD SlaveThread(void *lpParam)
 
 	CommandPacket	*CurrentPkt;
 
-	uint64_t Data;
-	uint64_t state;
+	fd_set set;
+	struct timeval timeout;
 
 	// Cast the parameter to the correct data type.
 	// The pointer is known to be valid because 
 	// it was checked for NULL before the thread was created.
 
 	TData = (ThreadData *)lpParam;
-	// Receive until the peer shuts down the connection
 
 	checkandresize();
 
@@ -221,105 +289,75 @@ DWORD SlaveThread(void *lpParam)
 
 	do
 	{
-		checkandresize();
+		timeout.tv_sec = 0;
+		timeout.tv_usec = 20000;
 
-		iResult = recv(TData->ClientSocket, recvbuf, recvbuflen, 0);
-		if (iResult > 0)
+		FD_ZERO(&set); /* clear the set */
+		FD_SET(TData->ClientSocket, &set); /* add our file descriptor to the set */
+
+		iResult = select(0, &set, NULL, NULL, (timeval *)&timeout);
+		if (iResult == 0)
 		{
-			if (iResult < DEFAULT_BUFLEN)
+			/* a timeout occured */
+			if (GPIOs->NeedSending())
 			{
-				recvbuf[iResult] = 0;
+				SendPinStates(TData);
 			}
-			else
+			checkandresize();
+		}
+		else if (iResult != -1)
+		{
+			iResult = recv(TData->ClientSocket, recvbuf, recvbuflen, 0);
+			if (iResult > 0)
 			{
-				recvbuf[DEFAULT_BUFLEN - 1] = 0;
-			}
-			log_win->printw("Bytes received: %d\n", iResult);
-			log_win->refresh();
-
-			CurrentPkt = (CommandPacket *)recvbuf;
-
-			for (int i = 0; i < iResult; i += CurrentPkt->Data[PACKETLEN], CurrentPkt = (CommandPacket *)((char *)CurrentPkt + (CurrentPkt->Data[PACKETLEN])))
-			{
-				switch (CurrentPkt->Data[PACKETTYPE])
+				if (iResult < DEFAULT_BUFLEN)
 				{
-				case MACHINEDESC:
-					break;
-
-				case PINSTATE:
-					Data = (uint64_t)CurrentPkt->Data[2] | (uint64_t)CurrentPkt->Data[3] << 16 | (uint64_t)CurrentPkt->Data[4] << 32 | (uint64_t)CurrentPkt->Data[5] << 48;
-
-					for (int j = 0; j < NUMPIPINS && Data; j++)
-					{
-						state = Data & 0x1;
-
-						if (state)
-						{
-							Button *But;
-
-							But = panel_win->find_button_data(j);
-
-							if (!But->GetOut())
-							{
-								But->SetOut(true);
-							}
-
-							if (But)
-							{
-								But->SetSelected(CurrentPkt->Data[6] != 0);
-								GPIOStatus[But->GetiData()] = CurrentPkt->Data[6];
-								But->draw();
-							}
-						}
-						Data = Data >> 1;
-					}
-					break;
-
-				case READSTATE:
-					CommandPacket	Send;
-					Data = 0;
-
-					for (int j = 0; j < NUMPIPINS; j++)
-					{
-						Data = Data << 1;
-						if (GPIOStatus[NUMPIPINS - 1 - j])
-						{
-							Data |= 0x01;
-						}
-					}
-
-					Send.Data[2] = (unsigned short)Data;
-					Send.Data[3] = (unsigned short)(Data >> 16);
-					Send.Data[4] = (unsigned short)(Data >> 32);
-					Send.Data[5] = (unsigned short)(Data >> 48);
-
-					Send.Data[PACKETLEN] = sizeof(Send.Data[0]) * 6;
-					Send.Data[PACKETTYPE] = READRESPONSE;
-
-					send(TData->ClientSocket, (char *)&Send, Send.Data[PACKETLEN], 0);
-
-					log_win->printw("Read State received.\n");
-					break;
-
-				default:
-					log_win->printw("Unknown Packet Type\n");
-					break;
+					recvbuf[iResult] = 0;
 				}
+				else
+				{
+					recvbuf[DEFAULT_BUFLEN - 1] = 0;
+				}
+				log_win->printw("Bytes received: %d\n", iResult);
+				log_win->refresh();
+
+				CurrentPkt = (CommandPacket *)recvbuf;
+
+				for (int i = 0; i < iResult; i += CurrentPkt->Data[PACKETLEN], CurrentPkt = (CommandPacket *)((char *)CurrentPkt + (CurrentPkt->Data[PACKETLEN])))
+				{
+					switch (CurrentPkt->Data[PACKETTYPE])
+					{
+					case MACHINEDESC:
+						break;
+
+					case PINSTATE:
+						SetPinStates(TData, CurrentPkt,FALSE);
+						break;
+
+					case READSTATE:
+						SendPinStates(TData);
+						break;
+
+					default:
+						log_win->printw("Unknown Packet Type\n");
+						break;
+					}
+				}
+				panel_win->Display();
+				log_win->refresh();
 			}
-			panel_win->Display();
+			else if (iResult == 0)
+			{
+				log_win->printw("Connection closing...\n");
+			}
+			else 
+			{
+				log_win->printw("recv failed with error: %d\n", WSAGetLastError());
+				closesocket(TData->ClientSocket);
+			}
 			log_win->refresh();
 		}
-		else if (iResult == 0)
-		{
-			log_win->printw("Connection closing...\n");
-		}
-		else
-		{
-			log_win->printw("recv failed with error: %d\n", WSAGetLastError());
-			closesocket(TData->ClientSocket);
-		}
-		log_win->refresh();
-	} while (iResult > 0 && !GlobalExit);
+	} while ((iResult >= 0 || (iResult ==-1 &&  WSAGetLastError() == EINTR)) && !GlobalExit);
 
 	// cleanup
 	closesocket(TData->ClientSocket);
@@ -360,12 +398,19 @@ int main(int argc, char**argv)
 #endif
 
 	WINDOW	*Master;
+	ThreadData *Data;
+
+	fd_set set;
+	struct timeval timeout;
+
 
 #ifdef XCURSES
 	Master = Xinitscr(argc, argv);
 #else
 	Master = initscr();
 #endif
+
+	GPIOs = new GPIO(NUMPIPINS);
 
 	if (Master)
 	{
@@ -385,8 +430,6 @@ int main(int argc, char**argv)
 		{
 			init_pair(i, color_table[i], COLOR_BLACK);
 		}
-
-
 
 		resize_term(BUTTONWINDOWHEIGHT + LOGWINHEIGHT, BUTTONSPERROW * MYBUTTONWIDTH + 2);
 
@@ -416,7 +459,6 @@ int main(int argc, char**argv)
 #else
 			iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 #endif
-
 			if (iResult == 0)
 			{
 #ifdef _POSIX_VERSION                      
@@ -459,10 +501,6 @@ int main(int argc, char**argv)
 							iResult = listen(ListenSocket, SOMAXCONN);
 							if (iResult != SOCKET_ERROR)
 							{
-								fd_set set;
-								struct timeval timeout;
-								int rv;
-
 								timeout.tv_sec = 0;
 								timeout.tv_usec = 20000;
 
@@ -471,19 +509,19 @@ int main(int argc, char**argv)
 
 								for (; EveythingOK && !GlobalExit;)
 								{
-									ThreadData *Data = new ThreadData;
+									Data = new ThreadData;
 
 									FD_ZERO(&set); /* clear the set */
 									FD_SET(ListenSocket, &set); /* add our file descriptor to the set */
 
-									rv = select(0, &set, NULL, NULL, (timeval *)&timeout);
-									if (rv == 0)
+									iResult = select(0, &set, NULL, NULL, (timeval *)&timeout);
+									if (iResult == 0)
 									{
 										/* a timeout occured */
 										log_win->DoSpinner();
 										panel_win->Display();
 									}
-									else if (rv != -1)
+									else if (iResult != -1)
 									{
 										log_win->printw("About to Call Accept:\n");
 										log_win->refresh();
@@ -517,7 +555,7 @@ int main(int argc, char**argv)
 									{
 										if(WSAGetLastError()!=EINTR)
 										{
-	                                        log_win->printw("Select Error %d\n", WSAGetLastError()); /* an error accured */
+											log_win->printw("Select Error %d\n", WSAGetLastError()); /* an error accured */
 											EveythingOK = false;
 										}
 									}
@@ -548,7 +586,7 @@ int main(int argc, char**argv)
 					log_win->printw("getaddrinfo failed with error: %d\n", iResult);
 					EveythingOK = false;
 				}
-#ifdef __WINDOWS__                                
+#ifndef _POSIX_VERSION                                
 				WSACleanup();
 #endif			
 			}
@@ -596,6 +634,11 @@ int main(int argc, char**argv)
 #else
 		_getch();
 #endif
+	}
+
+	if (GPIOs != (GPIO *)-1)
+	{
+		delete GPIOs;
 	}
 	return EveythingOK ? 0 : 1;
 }

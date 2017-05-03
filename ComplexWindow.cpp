@@ -1,3 +1,16 @@
+/*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+* THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 #include <unistd.h>
@@ -15,11 +28,12 @@
 
 #include "Fudge.h"
 
+#include "GPIO.h"
 #include "Button.h"
 #include "ComplexWindow.h"
 #include "Dummy-Panel.h"
 
-extern bool	GPIOStatus[];
+//extern bool	GPIOStatus[];
 
 ComplexWindow::ComplexWindow(int height, int width, int starty, int startx)
 {
@@ -264,10 +278,11 @@ void ComplexWindow::Display()
 
 					if (But && !But->Out)
 					{
+						But->SetIn(true);
 						But->Selected = !But->Selected;
 						But->draw();
 
-						GPIOStatus[But->iData] = But->Selected;
+						GPIOs->SetStatus(But->iData,But->Selected,true);
 
 						log_win->printw("Mouse: X %d Y %d Id %s\n", event.x, event.y, But->Text);
 						log_win->refresh();

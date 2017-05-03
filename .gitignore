@@ -140,3 +140,9 @@ GDummyPanelLinux/dist/Debug/GNU-Linux/gdummypanellinux
 GDummyPanelCygwin/nbproject/private/private.xml
 
 x64/Debug/GDummyPanel.obj
+
+x64/Debug/GPIO.obj
+
+.vs/GDummyPanel/v15/ipch/AutoPCH/GDUMMYPANEL-9ed5380c/GPIO-920b7dcf/GPIO.ipch
+
+.vs/GDummyPanel/v15/ipch/AutoPCH/GDUMMYPANEL-9ed5380c/GPIO-bce6db74/GPIO.ipch

@@ -12,32 +12,44 @@
 * THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#pragma once
+#include <stdio.h>
+#include <string.h>
 
+#include "curses.h"
 
-class ComplexWindow
+#include "Fudge.h"
+
+#include "Button.h"
+#include "ComplexWindow.h"
+
+#include "GPIO.h"
+
+GPIO::GPIO(int Size)
 {
-public:
-	ComplexWindow();
-	ComplexWindow(int height, int width, int starty, int startx);
+	NeedsSend = true;
+	Status = new bool[Size];
+	memset(Status, false, sizeof(Status[0])*Size);
+}
 
-	~ComplexWindow();
-	void	addbox();
-	void	add_button(Button *In);
-	Button	*find_button(int x, int y);
-	Button	*find_button_data(int data);
-	void	removebox();
-	void	complexresize(int height, int width);
-	void	mvwin(int height);
-	void	DoSpinner();
-	int     _getch();
-	void	Display();
-	void	refresh();
-	void	printw(const char *, ...);
+GPIO::~GPIO()
+{
+	NeedsSend = true;
+}
 
-private:
-	WINDOW  *Outer;
-	WINDOW  *Inner;
 
-	Button *ButtonList;
+void GPIO::SetStatus(int i, bool StatusIn,bool FromPanel)
+{ 
+	if (Status[i] != StatusIn)
+	{
+		Status[i] = StatusIn;
+		if (FromPanel)
+		{
+			NeedsSend = true;
+		}
+	}
+};
+
+bool GPIO::NeedSending()
+{
+	return NeedsSend;
 };

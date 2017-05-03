@@ -112,11 +112,13 @@
     <ClCompile Include="Button.Cpp" />
     <ClCompile Include="ComplexWindow.cpp" />
     <ClCompile Include="GDummyPanel.cpp" />
+    <ClCompile Include="GPIO.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h" />
     <ClInclude Include="ComplexWindow.h" />
     <ClInclude Include="Dummy-Panel.h" />
+    <ClInclude Include="GPIO.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

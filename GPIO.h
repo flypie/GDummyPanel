@@ -14,30 +14,24 @@
 
 #pragma once
 
-
-class ComplexWindow
+class GPIO
 {
 public:
-	ComplexWindow();
-	ComplexWindow(int height, int width, int starty, int startx);
+	GPIO(int size);
+	~GPIO();
 
-	~ComplexWindow();
-	void	addbox();
-	void	add_button(Button *In);
-	Button	*find_button(int x, int y);
-	Button	*find_button_data(int data);
-	void	removebox();
-	void	complexresize(int height, int width);
-	void	mvwin(int height);
-	void	DoSpinner();
-	int     _getch();
-	void	Display();
-	void	refresh();
-	void	printw(const char *, ...);
+	//	void SetPin(int i);
+	bool GetStatus(int i) { return Status[i]; };
+	void SetStatus(int i, bool StatusIn, bool FromPanel);
+	bool NeedSending();
+
+protected:
+	friend void SendPinStates(struct ThreadDataT *TData);
+
+	void Sent()	{NeedsSend = false;};
 
 private:
-	WINDOW  *Outer;
-	WINDOW  *Inner;
-
-	Button *ButtonList;
+	bool	*Status;
+	bool	NeedsSend;
+	int		Pins;
 };
