@@ -8,6 +8,7 @@
       <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/ComplexWindow.h</itemPath>
       <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/Dummy-Panel.h</itemPath>
       <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/Fudge.h</itemPath>
+      <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/GPIO.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -19,6 +20,7 @@
       <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/Button.cpp</itemPath>
       <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/ComplexWindow.cpp</itemPath>
       <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/GDummyPanel.cpp</itemPath>
+      <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/GPIO.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -85,6 +87,16 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GPIO.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GPIO.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
@@ -139,6 +151,16 @@
       <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GDummyPanel.cpp"
             ex="false"
             tool="1"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GPIO.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GPIO.h"
+            ex="false"
+            tool="3"
             flavor2="0">
       </item>
     </conf>

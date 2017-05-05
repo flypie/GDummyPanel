@@ -27,12 +27,13 @@ public:
 	void draw();
 	void SetSelected(bool In);
 
-	void SetOut(bool In);
-	void SetIn(bool In);
+	void SetOutput(bool In);
+	void SetInput(bool In);
+	void SetEnabled(bool In);
 
 	bool GetSelected();
-	bool GetOut();
-	int	GetiData();
+	bool	GetOut();
+	int		GetiData();
 
 private:
 
@@ -43,8 +44,10 @@ private:
 	Button *Next;
 	int		iData;
 	WINDOW	*Win;
+
 	bool	Out;
 	bool	In;
+	bool	Enabled;
 };
 
 

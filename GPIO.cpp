@@ -26,30 +26,28 @@
 
 GPIO::GPIO(int Size)
 {
-	NeedsSend = true;
-	Status = new bool[Size];
-	memset(Status, false, sizeof(Status[0])*Size);
+    NeedsSend = true;
+    Status = new bool[Size];
+    memset(Status, false, sizeof(Status[0])*Size);
 }
 
 GPIO::~GPIO()
 {
-	NeedsSend = true;
+    NeedsSend = true;
 }
 
 
-void GPIO::SetStatus(int i, bool StatusIn,bool FromPanel)
-{ 
-	if (Status[i] != StatusIn)
-	{
-		Status[i] = StatusIn;
-		if (FromPanel)
-		{
-			NeedsSend = true;
-		}
-	}
+void GPIO::SetStatus(int i, bool StatusIn, bool FromPanel)
+{
+    if (Status[i] != StatusIn) {
+        Status[i] = StatusIn;
+        if (FromPanel) {
+            NeedsSend = true;
+        }
+    }
 };
 
 bool GPIO::NeedSending()
 {
-	return NeedsSend;
+    return NeedsSend;
 };

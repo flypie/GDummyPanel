@@ -34,6 +34,8 @@ public:
 	void	Display();
 	void	refresh();
 	void	printw(const char *, ...);
+	void	DeleteButtons();
+
 
 private:
 	WINDOW  *Outer;

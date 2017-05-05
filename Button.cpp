@@ -32,104 +32,107 @@
 
 Button::Button()
 {
-	Next = NULL;
-	Out = false;
+    Next = NULL;
+    Out = false;
+    In = false;
+    Enabled = true;
 
-	BG = new char[10];
-	strcpy(BG, "  ");
-	Text = new char[10];
+    BG = new char[10];
+    strcpy(BG, "  ");
+    Text = new char[10];
 }
 
-Button::Button(int inx, int  iny, int  inh, int  inw, int  ini)
+Button::Button(int inx, int  iny, int  inh, int  inw, int  ini):Button()
 {
-	Next = NULL;
-	Out = false;
-	In = false;
+    Button(); // Call the basic constructor.
 
-	BG = new char[10];
-	strcpy(BG, "  ");
-	Text = new char[10];
+    x = inx;
+    y = iny;
+    h = inh;
+    w = inw;
+    iData = ini;
+    Win = newwin(h, w, y, x);
 
-	x = inx;
-	y = iny;
-	h = inh;
-	w = inw;
-	iData = ini;
-	Win = newwin(h, w, y, x);
+    box(Win, 0, 0);
 
-	box(Win, 0, 0);
-
-	snprintf(Text, 10, "%03d", iData);
+    snprintf(Text, 10, "%03d", iData);
 
 }
 
 void Button::draw()
 {
-	if (Selected)
-	{
-		if (Out)
-		{
-			wattron(Win, COLOR_PAIR(4) | A_REVERSE);
-		}
-		else
-		{
-			wattron(Win, COLOR_PAIR(2) | A_REVERSE);
-		}
-	}
+    if (Selected) {
+        if (Out) {
+            wattron(Win, COLOR_PAIR(4) | A_REVERSE);
+        }
+        else {
+            wattron(Win, COLOR_PAIR(2) | A_REVERSE);
+        }
+    }
 
-	wmove(Win, 1, 1);
-	wprintw(Win, BG);
+    wmove(Win, 1, 1);
+    wprintw(Win, BG);
 
-	wmove(Win, 1, 1 + ((w - 2) - (int)strlen(Text)) / 2);
-	wprintw(Win, Text);
+    wmove(Win, 1, 1 + ((w - 2) - (int)strlen(Text)) / 2);
+    wprintw(Win, Text);
 
-	if (Selected)
-	{
-		wattroff(Win, A_REVERSE);
-	}
+    if (Selected) {
+        wattroff(Win, A_REVERSE);
+    }
 
-	wattron(Win, COLOR_PAIR(7));
+    wattron(Win, COLOR_PAIR(7));
 
-	wrefresh(Win);
+    wrefresh(Win);
 }
 
 
 void Button::SetSelected(bool In)
 {
-	Selected = In;
+    Selected = In;
 }
 
 
-void Button::SetOut(bool In)
+void Button::SetOutput(bool In)
 {
-	Out = In;
+    Out = In;
 
-	wattron(Win, COLOR_PAIR(4) | A_REVERSE);
-	box(Win, 0, 0);
-	wattroff(Win, COLOR_PAIR(4) | A_REVERSE);
+    wattron(Win, COLOR_PAIR(4) | A_REVERSE);
+    box(Win, 0, 0);
+    wattroff(Win, COLOR_PAIR(4) | A_REVERSE);
 }
 
-void Button::SetIn(bool InIn)
+void Button::SetInput(bool InIn)
 {
-	In = InIn;
+    In = InIn;
 
-	wattron(Win, COLOR_PAIR(2) | A_REVERSE);
-	box(Win, 0, 0);
-	wattroff(Win, COLOR_PAIR(2) | A_REVERSE);
+    wattron(Win, COLOR_PAIR(2) | A_REVERSE);
+    box(Win, 0, 0);
+    wattroff(Win, COLOR_PAIR(2) | A_REVERSE);
+}
+
+void Button::SetEnabled(bool InIn)
+{
+    Enabled = InIn;
+
+    if (!Enabled) {
+        wattron(Win, COLOR_PAIR(6) | A_REVERSE);
+        box(Win, 0, 0);
+        wattroff(Win, COLOR_PAIR(6) | A_REVERSE);
+    }
 }
 
 
 bool Button::GetOut()
 {
-	return Out;
+    return Out;
 }
 
 bool Button::GetSelected()
 {
-	return Selected;
+    return Selected;
 }
 
 int Button::GetiData()
 {
-	return iData;
+    return iData;
 }

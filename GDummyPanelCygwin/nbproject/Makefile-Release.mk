@@ -37,7 +37,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/83ecf3c1/Button.o \
 	${OBJECTDIR}/_ext/83ecf3c1/ComplexWindow.o \
-	${OBJECTDIR}/_ext/83ecf3c1/GDummyPanel.o
+	${OBJECTDIR}/_ext/83ecf3c1/GDummyPanel.o \
+	${OBJECTDIR}/_ext/83ecf3c1/GPIO.o
 
 
 # C Compiler Flags
@@ -78,6 +79,11 @@ ${OBJECTDIR}/_ext/83ecf3c1/GDummyPanel.o: /cygdrive/C/cygwin64/home/John-Bradley
 	${MKDIR} -p ${OBJECTDIR}/_ext/83ecf3c1
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/83ecf3c1/GDummyPanel.o /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/GDummyPanel.cpp
+
+${OBJECTDIR}/_ext/83ecf3c1/GPIO.o: /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/GPIO.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/83ecf3c1
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/83ecf3c1/GPIO.o /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/GPIO.cpp
 
 # Subprojects
 .build-subprojects:
