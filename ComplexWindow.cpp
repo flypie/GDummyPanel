@@ -22,6 +22,9 @@
 #include <termios.h>
 #endif
 
+
+
+
 #define NCURSES_INTERNALS 1 //Need to see some of the internals.
 
 #include "curses.h"
@@ -33,10 +36,12 @@
 #include "ComplexWindow.h"
 #include "Dummy-Panel.h"
 
-//extern bool	GPIOStatus[];
+extern pthread_mutex_t lock; //NCurses not thread  safe/
 
 ComplexWindow::ComplexWindow(int height, int width, int starty, int startx)
 {
+
+    
     Outer = newwin(height, width, starty, startx);
 
     Inner = newwin(height - 3, width - 2, starty + 1, startx + 1);
@@ -74,15 +79,20 @@ ComplexWindow::~ComplexWindow()
 
 void ComplexWindow::addbox()
 {
+    pthread_mutex_lock(&lock);
+
     box(Outer, 0, 0);
 
     wrefresh(Outer);		/* Show that box */
+    
+    pthread_mutex_unlock(&lock);    
 }
 
 
 void ComplexWindow::add_button(Button *In)
 {
     Button	*Cur;
+    pthread_mutex_lock(&lock);
 
     if (!ButtonList) {
         ButtonList = In;
@@ -94,12 +104,15 @@ void ComplexWindow::add_button(Button *In)
         };
         Cur->Next = In;
     }
+    pthread_mutex_unlock(&lock);    
 }
 
 Button *ComplexWindow::find_button(int x, int y)
 {
     Button	*Cur = NULL;
     bool	NotFound = true;
+
+    pthread_mutex_lock(&lock);
 
     if (!ButtonList) {
     }
@@ -128,6 +141,7 @@ Button *ComplexWindow::find_button(int x, int y)
     if (NotFound) {
         Cur = NULL;
     }
+    pthread_mutex_unlock(&lock);    
 
     return Cur;
 }
@@ -137,6 +151,7 @@ Button *ComplexWindow::find_button_data(int data)
     Button	*Cur = NULL;
     bool	NotFound = true;
 
+    pthread_mutex_lock(&lock);
 
     Cur = ButtonList;
 
@@ -149,12 +164,16 @@ Button *ComplexWindow::find_button_data(int data)
         }
     }
 
+    pthread_mutex_unlock(&lock);    
+
     return Cur;
 }
 
 void ComplexWindow::DeleteButtons()
 {
     Button	*Cur, *Del;
+
+    pthread_mutex_lock(&lock);
 
     Cur = ButtonList;
     while (Cur != 0) {
@@ -164,10 +183,15 @@ void ComplexWindow::DeleteButtons()
         delete Del;
     };
     ButtonList = NULL;
+    
+    pthread_mutex_unlock(&lock);    
+
 }
 
 void ComplexWindow::removebox()
 {
+    pthread_mutex_lock(&lock);
+
     wborder(Outer, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
     /* The parameters taken are
     * 1. win: the window on which to operate
@@ -180,28 +204,39 @@ void ComplexWindow::removebox()
     * 8. bl: character to be used for the bottom left corner of the window
     * 9. br: character to be used for the bottom right corner of the window
     */
+    pthread_mutex_unlock(&lock);    
 
 }
 
 void ComplexWindow::complexresize(int height, int width)
 {
+    pthread_mutex_lock(&lock);
+
     wresize(Outer, height, width);
     wresize(Inner, height - 2, width - 2);
     wclear(Outer);
     addbox();
     wrefresh(Outer);
     wrefresh(Inner);
+    pthread_mutex_unlock(&lock);    
+
 }
 
 void ComplexWindow::mvwin(int height)
 {
+    pthread_mutex_lock(&lock);
+
     ::mvwin(Outer, height / 2, 0);
     ::mvwin(Inner, height / 2 + 1, 1);
+
+    pthread_mutex_unlock(&lock);    
+
 }
 
 void ComplexWindow::DoSpinner()
 {
     static int count = 0;
+    pthread_mutex_lock(&lock);
 
     count++;
 
@@ -226,17 +261,23 @@ void ComplexWindow::DoSpinner()
 
     wattroff(Outer, COLOR_PAIR(count % 8));
     wrefresh(Outer);
+    pthread_mutex_unlock(&lock);    
 }
 
 int ComplexWindow::_getch()
 {
-    return wgetch(Inner);
+    int val;
+    pthread_mutex_lock(&lock);
+    val=wgetch(Inner);
+    pthread_mutex_unlock(&lock);    
+    return val;
 }
 
 void ComplexWindow::Display()
 {
     MEVENT event;
     int c;
+    pthread_mutex_lock(&lock);
 
     c = wgetch(Inner);
 
@@ -288,11 +329,15 @@ void ComplexWindow::Display()
     default:
         break;
     }
+    pthread_mutex_unlock(&lock);    
 }
 
 void ComplexWindow::refresh()
 {
+    pthread_mutex_lock(&lock);
     wrefresh(Inner);
+    pthread_mutex_unlock(&lock);    
+
 }
 
 void ComplexWindow::printw(const char *format, ...)
@@ -300,8 +345,11 @@ void ComplexWindow::printw(const char *format, ...)
     char buffer[256];
     va_list args;
     va_start(args, format);
+    pthread_mutex_lock(&lock);
+
     vsprintf(buffer, format, args);
     ::wprintw(Inner, buffer);
     va_end(args);
+    pthread_mutex_unlock(&lock);    
 
 }
