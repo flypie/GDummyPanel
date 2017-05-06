@@ -14,6 +14,11 @@
 
 #pragma once
 
+#ifdef _POSIX_VERSION
+#include <pthread.h>
+#else
+#include <process.h>
+#endif
 
 class ComplexWindow
 {
@@ -35,8 +40,6 @@ public:
 	void	refresh();
 	void	printw(const char *, ...);
 	void	DeleteButtons();
-
-
 private:
 	WINDOW  *Outer;
 	WINDOW  *Inner;
