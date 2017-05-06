@@ -23,12 +23,18 @@
 #ifdef __CYGWIN__
 #include <termios.h>
 #endif
+#ifdef _POSIX_VERSION
+#include <pthread.h>
+#else
+#include <process.h>
+#endif
 
 #include "curses.h"
 
 #include "Fudge.h"
 #include "Button.h"
 
+extern pthread_mutex_t lock; //NCurses not thread  safe/
 
 Button::Button()
 {
@@ -51,16 +57,22 @@ Button::Button(int inx, int  iny, int  inh, int  inw, int  ini):Button()
     h = inh;
     w = inw;
     iData = ini;
+    pthread_mutex_lock(&lock);
+    
     Win = newwin(h, w, y, x);
 
     box(Win, 0, 0);
 
+    pthread_mutex_unlock(&lock);    
+    
     snprintf(Text, 10, "%03d", iData);
 
 }
 
 void Button::draw()
 {
+    pthread_mutex_lock(&lock);
+    
     if (Selected) {
         if (Out) {
             wattron(Win, COLOR_PAIR(4) | A_REVERSE);
@@ -83,6 +95,8 @@ void Button::draw()
     wattron(Win, COLOR_PAIR(7));
 
     wrefresh(Win);
+    
+    pthread_mutex_unlock(&lock);
 }
 
 
@@ -96,7 +110,9 @@ void Button::SetOutput(bool In)
 {
     Out = In;
 
-    wattron(Win, COLOR_PAIR(4) | A_REVERSE);
+   pthread_mutex_lock(&lock);
+ 
+           wattron(Win, COLOR_PAIR(4) | A_REVERSE);
     box(Win, 0, 0);
     wattroff(Win, COLOR_PAIR(4) | A_REVERSE);
 }
@@ -105,9 +121,14 @@ void Button::SetInput(bool InIn)
 {
     In = InIn;
 
+    pthread_mutex_lock(&lock);
+ 
     wattron(Win, COLOR_PAIR(2) | A_REVERSE);
     box(Win, 0, 0);
     wattroff(Win, COLOR_PAIR(2) | A_REVERSE);
+
+    pthread_mutex_unlock(&lock);
+ 
 }
 
 void Button::SetEnabled(bool InIn)
@@ -115,9 +136,13 @@ void Button::SetEnabled(bool InIn)
     Enabled = InIn;
 
     if (!Enabled) {
+        pthread_mutex_lock(&lock);
+ 
         wattron(Win, COLOR_PAIR(6) | A_REVERSE);
         box(Win, 0, 0);
         wattroff(Win, COLOR_PAIR(6) | A_REVERSE);
+    
+        pthread_mutex_unlock(&lock); 
     }
 }
 
