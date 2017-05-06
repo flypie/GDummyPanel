@@ -133,6 +133,8 @@ uint64_t EnabledMask = 0xFFFFFFFF;
 uint64_t InputMask;
 uint64_t OutputMask;
 
+pthread_mutex_t lock; //NCurses not thread  safe/
+
 #ifdef _POSIX_VERSION
 static struct termios oldc, newc;
 
@@ -242,7 +244,7 @@ void SetPinCount(ThreadData *TData, CommandPacket	*CurrentPkt)
 {
     int Count =
 
-        Count = CurrentPkt->Data[2];
+    Count = CurrentPkt->Data[2];
 
     if (Count != GNumButtons) {
         CreateButtons(Count);
@@ -365,7 +367,7 @@ void SetOutputMap(ThreadData *TData, CommandPacket	*CurrentPkt)
     }
 }
 
-DWORD SlaveThread(void *lpParam)
+static void *SlaveThread(void *lpParam)
 {
     ThreadData *TData;
 
@@ -384,11 +386,12 @@ DWORD SlaveThread(void *lpParam)
 
     TData = (ThreadData *)lpParam;
 
-    checkandresize();
-
-    log_win->printw("Slave Thread Started:\n");
+    log_win->printw("Slave Thread Started:1 Socket %d\n",TData->ClientSocket);
     log_win->refresh();
 
+    checkandresize();
+
+    
     do {
         timeout.tv_sec = 0;
         timeout.tv_usec = 20000;
@@ -396,7 +399,7 @@ DWORD SlaveThread(void *lpParam)
         FD_ZERO(&set); /* clear the set */
         FD_SET(TData->ClientSocket, &set); /* add our file descriptor to the set */
 
-        iResult = select(0, &set, NULL, NULL, (timeval *)&timeout);
+        iResult = select(FD_SETSIZE, &set, NULL, NULL, (timeval *)&timeout);
         if (iResult == 0) {
             /* a timeout occured */
             if (GPIOs->NeedSending()) {
@@ -426,22 +429,27 @@ DWORD SlaveThread(void *lpParam)
                         break;
 
                     case READREQ:
+                        log_win->printw("READREQ\n");
                         SendPinStates(TData);
                         break;
 
                     case PINCOUNT:
+                        log_win->printw("PINCOUNT\n");
                         SetPinCount(TData, CurrentPkt);
                         break;
 
                     case ENABLEMAP:
+                        log_win->printw("ENABLEMAP\n");
                         SetEnableMap(TData, CurrentPkt);
                         break;
 
                     case INPUTMAP:
+                        log_win->printw("INPUTMAP\n");
                         SetInputMap(TData, CurrentPkt);
                         break;
 
                     case OUTPUTMAP:
+                        log_win->printw("OUTPUTMAP\n");
                         SetOutputMap(TData, CurrentPkt);
                         break;
 
@@ -472,14 +480,18 @@ DWORD SlaveThread(void *lpParam)
 
     log_win->printw("Slave Thread Exited:\n");
     log_win->refresh();
-
-    return 0;
 }
 
 int main(int argc, char**argv)
 {
     int i;
+    pthread_mutexattr_t Attr;
 
+    pthread_mutexattr_init(&Attr);
+    pthread_mutexattr_settype(&Attr,PTHREAD_MUTEX_RECURSIVE );
+    
+    pthread_mutex_init(&lock,&Attr);
+    
 #ifdef _POSIX_VERSION
 #else
     WSADATA wsaData;
@@ -499,7 +511,7 @@ int main(int argc, char**argv)
     HANDLE  hThread;
 
 #ifdef _POSIX_VERSION
-    pthread_t *ThreadId;
+    pthread_t ThreadId;
 #else        
     DWORD   ThreadId;
 #endif
@@ -607,7 +619,7 @@ int main(int argc, char**argv)
                                     FD_ZERO(&set); /* clear the set */
                                     FD_SET(ListenSocket, &set); /* add our file descriptor to the set */
 
-                                    iResult = select(0, &set, NULL, NULL, (timeval *)&timeout);
+                                    iResult = select(FD_SETSIZE, &set, NULL, &set, (timeval *)&timeout);
                                     if (iResult == 0) {
                                         /* a timeout occured */
                                         log_win->DoSpinner();
@@ -621,8 +633,10 @@ int main(int argc, char**argv)
                                         Data->ClientSocket = accept(ListenSocket, NULL, NULL);
 
                                         if (Data->ClientSocket != INVALID_SOCKET) {
+                                            log_win->printw("About to Spawn:\n");
+                                            log_win->refresh();                                            
 #ifdef _POSIX_VERSION
-                                            hThread = pthread_create(ThreadId, NULL, (void* (*)(void*))SlaveThread, Data);
+                                            hThread = pthread_create(&ThreadId, NULL, &SlaveThread, Data);
 #else
                                             hThread = CreateThread(
                                                 NULL,                   // default security attributes
@@ -719,6 +733,9 @@ int main(int argc, char**argv)
     if (GPIOs != (GPIO *)-1) {
         delete GPIOs;
     }
+    
+    pthread_mutex_destroy(&lock);
+        
     return EveythingOK ? 0 : 1;
 }
 
