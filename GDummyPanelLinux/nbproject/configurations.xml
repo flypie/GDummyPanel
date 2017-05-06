@@ -8,6 +8,7 @@
       <itemPath>../ComplexWindow.h</itemPath>
       <itemPath>../Dummy-Panel.h</itemPath>
       <itemPath>../Fudge.h</itemPath>
+      <itemPath>../GPIO.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -19,6 +20,7 @@
       <itemPath>../Button.cpp</itemPath>
       <itemPath>../ComplexWindow.cpp</itemPath>
       <itemPath>../GDummyPanel.cpp</itemPath>
+      <itemPath>../GPIO.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -62,6 +64,10 @@
       </item>
       <item path="../GDummyPanel.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="../GPIO.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../GPIO.h" ex="false" tool="3" flavor2="0">
+      </item>
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
@@ -96,6 +102,10 @@
       <item path="../Fudge.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../GDummyPanel.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../GPIO.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../GPIO.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

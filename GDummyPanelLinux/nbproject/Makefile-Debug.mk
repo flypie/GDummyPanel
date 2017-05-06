@@ -37,7 +37,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/5c0/Button.o \
 	${OBJECTDIR}/_ext/5c0/ComplexWindow.o \
-	${OBJECTDIR}/_ext/5c0/GDummyPanel.o
+	${OBJECTDIR}/_ext/5c0/GDummyPanel.o \
+	${OBJECTDIR}/_ext/5c0/GPIO.o
 
 
 # C Compiler Flags
@@ -80,6 +81,11 @@ ${OBJECTDIR}/_ext/5c0/GDummyPanel.o: ../GDummyPanel.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/5c0
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5c0/GDummyPanel.o ../GDummyPanel.cpp
+
+${OBJECTDIR}/_ext/5c0/GPIO.o: ../GPIO.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/5c0
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5c0/GPIO.o ../GPIO.cpp
 
 # Subprojects
 .build-subprojects:
