@@ -118,6 +118,7 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="ComplexWindow.h" />
     <ClInclude Include="Dummy-Panel.h" />
+    <ClInclude Include="Fudge.h" />
     <ClInclude Include="GPIO.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

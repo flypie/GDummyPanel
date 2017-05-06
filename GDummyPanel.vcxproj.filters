@@ -41,5 +41,8 @@
     <ClInclude Include="GPIO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Fudge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
