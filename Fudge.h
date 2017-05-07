@@ -15,6 +15,27 @@
 #define FUDGE_H
 
 
+#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#include <unistd.h>
+#endif
+
+#define NCURSES_INTERNALS 1 //Need to see some of the internals.
+
+
+#ifdef _POSIX_VERSION
+#include <termios.h>
+#include <pthread.h>
+#else
+#include <windows.h>
+#include <process.h>
+
+
+#undef MOUSE_MOVED
+#endif
+
+#include "curses.h"
+
+
 #ifdef _POSIX_VERSION
 
 #define SOCKET  int
@@ -26,6 +47,22 @@
 #define WSAGetLastError() errno 
 
 #endif 
+
+#ifdef _POSIX_VERSION
+
+extern pthread_mutex_t lock; //NCurses not thread  safe/
+
+#define LOCKMUTEX   pthread_mutex_lock(&lock);
+#define UNLOCKMUTEX pthread_mutex_unlock(&lock);
+#else
+
+extern HANDLE  lock; //NCurses not thread  safe/
+
+#define LOCKMUTEX   WaitForSingleObject(lock, 0xFFFFFFFF );
+#define UNLOCKMUTEX ReleaseMutex(lock);
+
+#endif
+
 
 #endif /* FUDGE_H */
 

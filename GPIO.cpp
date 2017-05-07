@@ -15,8 +15,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "curses.h"
-
 #include "Fudge.h"
 
 #include "Button.h"

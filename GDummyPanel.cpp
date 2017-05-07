@@ -43,23 +43,14 @@
 #else
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <conio.h>
 #endif
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 
-#ifdef _POSIX_VERSION
-#include <pthread.h>
-#include <termios.h>
-#else
-#include <process.h>
-#include <conio.h>
-#endif
 
-#undef MOUSE_MOVED
-
-#include "curses.h"
 
 #include "Fudge.h"
 
@@ -133,7 +124,15 @@ uint64_t EnabledMask = 0xFFFFFFFF;
 uint64_t InputMask;
 uint64_t OutputMask;
 
+int GNumButtons = 0;
+
+
+#ifdef _POSIX_VERSION
 pthread_mutex_t lock; //NCurses not thread  safe/
+#else
+HANDLE  lock;
+#endif
+
 
 #ifdef _POSIX_VERSION
 static struct termios oldc, newc;
@@ -172,28 +171,6 @@ char mygetch(void)
 #endif
 
 
-void    checkandresize()
-{
-    int width, height;
-
-    getmaxyx(stdscr, height, width);
-
-    if (height != gheight || width != gwidth) {
-        gheight = height;
-        gwidth = width;
-
-        wclear(stdscr);
-
-        panel_win->complexresize(BUTTONWINDOWHEIGHT, gwidth);
-        log_win->complexresize(gheight - BUTTONWINDOWHEIGHT, gwidth);
-        log_win->mvwin(BUTTONWINDOWHEIGHT);
-
-        log_win->printw("Resize\n");
-        log_win->refresh();
-    }
-}
-
-int GNumButtons = 0;
 
 void CreateButtons(int Num)
 {
@@ -367,7 +344,13 @@ void SetOutputMap(ThreadData *TData, CommandPacket	*CurrentPkt)
     }
 }
 
+
+#ifdef _POSIX_VERSION 
 static void *SlaveThread(void *lpParam)
+#else
+
+DWORD WINAPI SlaveThread(LPVOID lpParam)
+#endif
 {
     ThreadData *TData;
 
@@ -389,8 +372,6 @@ static void *SlaveThread(void *lpParam)
     log_win->printw("Slave Thread Started:1 Socket %d\n",TData->ClientSocket);
     log_win->refresh();
 
-    checkandresize();
-
     
     do {
         timeout.tv_sec = 0;
@@ -405,7 +386,6 @@ static void *SlaveThread(void *lpParam)
             if (GPIOs->NeedSending()) {
                 SendPinStates(TData);
             }
-            checkandresize();
         }
         else if (iResult != -1) {
             iResult = recv(TData->ClientSocket, recvbuf, recvbuflen, 0);
@@ -480,17 +460,33 @@ static void *SlaveThread(void *lpParam)
 
     log_win->printw("Slave Thread Exited:\n");
     log_win->refresh();
+#ifdef _POSIX_VERSION
+#else
+    return 0;
+#endif
 }
 
 int main(int argc, char**argv)
 {
     int i;
+#ifdef _POSIX_VERSION
     pthread_mutexattr_t Attr;
 
     pthread_mutexattr_init(&Attr);
     pthread_mutexattr_settype(&Attr,PTHREAD_MUTEX_RECURSIVE );
     
     pthread_mutex_init(&lock,&Attr);
+#else
+    lock = CreateMutex( 
+        NULL,              // default security attributes
+        FALSE,             // initially not owned
+        NULL);             // unnamed mutex
+    if (lock == NULL) {
+        printf("CreateMutex error: %d\n", GetLastError());
+        return 1;
+    }
+#endif
+
     
 #ifdef _POSIX_VERSION
 #else
@@ -558,10 +554,6 @@ int main(int argc, char**argv)
         if (log_win&&panel_win) {
             CreateButtons(10);
 
-            if (has_colors()) {
-            }
-            else {
-            }
             log_win->printw("Presss 'X' to exit\n");
             log_win->refresh();
 
@@ -715,8 +707,8 @@ int main(int argc, char**argv)
 #else
             _getch();
 #endif
-
         }
+
         endwin();			/* End curses mode		  */
     }
     else {
@@ -734,8 +726,11 @@ int main(int argc, char**argv)
         delete GPIOs;
     }
     
+#ifdef _POSIX_VERSION
     pthread_mutex_destroy(&lock);
-        
+#else
+        CloseHandle(lock);
+#endif    
     return EveythingOK ? 0 : 1;
 }
 
