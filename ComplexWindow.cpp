@@ -23,6 +23,9 @@
 #include <process.h>
 #endif
 
+#define NCURSES_INTERNALS 1 //Need to see some of the internals.
+
+#include "Fudge.h"
 
 #include "GPIO.h"
 #include "Button.h"

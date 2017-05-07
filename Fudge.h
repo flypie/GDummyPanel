@@ -14,6 +14,19 @@
 #ifndef FUDGE_H
 #define FUDGE_H
 
+#ifdef _POSIX_VERSION
+#include <termios.h>
+#include <pthread.h>
+#else
+#include <windows.h>
+#include <process.h>
+
+
+#undef MOUSE_MOVED
+#endif
+
+#include "curses.h"
+
 
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 #include <unistd.h>
