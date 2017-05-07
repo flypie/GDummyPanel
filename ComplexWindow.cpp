@@ -99,6 +99,7 @@ void ComplexWindow::add_button(Button *In)
         };
         Cur->Next = In;
     }
+
     UNLOCKMUTEX    
 }
 
@@ -136,6 +137,7 @@ Button *ComplexWindow::find_button(int x, int y)
     if (NotFound) {
         Cur = NULL;
     }
+
     UNLOCKMUTEX    
 
     return Cur;
@@ -180,7 +182,6 @@ void ComplexWindow::DeleteButtons()
     ButtonList = NULL;
     
     UNLOCKMUTEX    
-
 }
 
 void ComplexWindow::removebox()
@@ -199,8 +200,8 @@ void ComplexWindow::removebox()
     * 8. bl: character to be used for the bottom left corner of the window
     * 9. br: character to be used for the bottom right corner of the window
     */
-    UNLOCKMUTEX    
 
+    UNLOCKMUTEX    
 }
 
 void ComplexWindow::complexresize(int height, int width)
@@ -213,8 +214,8 @@ void ComplexWindow::complexresize(int height, int width)
     addbox();
     wrefresh(Outer);
     wrefresh(Inner);
-    UNLOCKMUTEX    
 
+    UNLOCKMUTEX    
 }
 
 void ComplexWindow::mvwin(int height)
@@ -231,6 +232,7 @@ void ComplexWindow::mvwin(int height)
 void ComplexWindow::DoSpinner()
 {
     static int count = 0;
+
     LOCKMUTEX
 
     count++;
@@ -256,6 +258,7 @@ void ComplexWindow::DoSpinner()
 
     wattroff(Outer, COLOR_PAIR(count % 8));
     wrefresh(Outer);
+
     UNLOCKMUTEX    
 }
 
@@ -263,7 +266,9 @@ int ComplexWindow::_getch()
 {
     int val;
     LOCKMUTEX
+
     val=wgetch(Inner);
+
     UNLOCKMUTEX    
     return val;
 }
@@ -324,13 +329,16 @@ void ComplexWindow::Display()
     default:
         break;
     }
+
     UNLOCKMUTEX    
 }
 
 void ComplexWindow::refresh()
 {
     LOCKMUTEX
+
     wrefresh(Inner);
+
     UNLOCKMUTEX    
 
 }
@@ -340,11 +348,12 @@ void ComplexWindow::printw(const char *format, ...)
     char buffer[256];
     va_list args;
     va_start(args, format);
+
     LOCKMUTEX
 
     vsprintf(buffer, format, args);
     ::wprintw(Inner, buffer);
     va_end(args);
-    UNLOCKMUTEX    
 
+    UNLOCKMUTEX    
 }

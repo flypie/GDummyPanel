@@ -118,8 +118,7 @@ void Button::SetInput(bool InIn)
     box(Win, 0, 0);
     wattroff(Win, COLOR_PAIR(2) | A_REVERSE);
 
-    UNLOCKMUTEX
-        
+    UNLOCKMUTEX     
 }
 
 void Button::SetEnabled(bool InIn)

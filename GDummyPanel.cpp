@@ -124,6 +124,9 @@ uint64_t EnabledMask = 0xFFFFFFFF;
 uint64_t InputMask;
 uint64_t OutputMask;
 
+int GNumButtons = 0;
+
+
 #ifdef _POSIX_VERSION
 pthread_mutex_t lock; //NCurses not thread  safe/
 #else
@@ -168,28 +171,6 @@ char mygetch(void)
 #endif
 
 
-void    checkandresize()
-{
-    int width, height;
-
-    getmaxyx(stdscr, height, width);
-
-    if (height != gheight || width != gwidth) {
-        gheight = height;
-        gwidth = width;
-
-        wclear(stdscr);
-
-        panel_win->complexresize(BUTTONWINDOWHEIGHT, gwidth);
-        log_win->complexresize(gheight - BUTTONWINDOWHEIGHT, gwidth);
-        log_win->mvwin(BUTTONWINDOWHEIGHT);
-
-        log_win->printw("Resize\n");
-        log_win->refresh();
-    }
-}
-
-int GNumButtons = 0;
 
 void CreateButtons(int Num)
 {
@@ -391,8 +372,6 @@ DWORD WINAPI SlaveThread(LPVOID lpParam)
     log_win->printw("Slave Thread Started:1 Socket %d\n",TData->ClientSocket);
     log_win->refresh();
 
-    checkandresize();
-
     
     do {
         timeout.tv_sec = 0;
@@ -407,7 +386,6 @@ DWORD WINAPI SlaveThread(LPVOID lpParam)
             if (GPIOs->NeedSending()) {
                 SendPinStates(TData);
             }
-            checkandresize();
         }
         else if (iResult != -1) {
             iResult = recv(TData->ClientSocket, recvbuf, recvbuflen, 0);
@@ -576,10 +554,6 @@ int main(int argc, char**argv)
         if (log_win&&panel_win) {
             CreateButtons(10);
 
-            if (has_colors()) {
-            }
-            else {
-            }
             log_win->printw("Presss 'X' to exit\n");
             log_win->refresh();
 
@@ -733,8 +707,8 @@ int main(int argc, char**argv)
 #else
             _getch();
 #endif
-
         }
+
         endwin();			/* End curses mode		  */
     }
     else {
