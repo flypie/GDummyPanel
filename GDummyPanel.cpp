@@ -28,9 +28,7 @@
   * include/qemu/PanelEmu.h
   */
 
-#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
-#include <unistd.h>
-#endif
+#include "Fudge.h"
 
 #ifdef _POSIX_VERSION
 #include <netinet/in.h>
@@ -41,18 +39,7 @@
 #include <errno.h>
 #include <strings.h>
 #else
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <conio.h>
 #endif
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-
-
-
-#include "Fudge.h"
 
 #include "Button.h"
 #include "ComplexWindow.h"
@@ -500,17 +487,13 @@ int main(int argc, char**argv)
 #ifdef _POSIX_VERSION
     struct  sockaddr_in *result = NULL;
     struct  sockaddr_in hints;
+    pthread_t ThreadId;
 #else
     struct  addrinfo *result = NULL;
     struct  addrinfo hints;
-#endif
-    HANDLE  hThread;
-
-#ifdef _POSIX_VERSION
-    pthread_t ThreadId;
-#else        
     DWORD   ThreadId;
 #endif
+    HANDLE  hThread;
 
     WINDOW	*Master;
     ThreadData *Data;
@@ -729,7 +712,7 @@ int main(int argc, char**argv)
 #ifdef _POSIX_VERSION
     pthread_mutex_destroy(&lock);
 #else
-        CloseHandle(lock);
+    CloseHandle(lock);
 #endif    
     return EveythingOK ? 0 : 1;
 }

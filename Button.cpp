@@ -12,18 +12,9 @@
 * THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
-#include <unistd.h>
-#endif
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
 #include "Fudge.h"
+
 #include "Button.h"
-
-
 
 Button::Button()
 {

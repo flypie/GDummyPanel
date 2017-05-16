@@ -12,13 +12,7 @@
 * THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <stdio.h>
-#include <string.h>
-
 #include "Fudge.h"
-
-#include "Button.h"
-#include "ComplexWindow.h"
 
 #include "GPIO.h"
 

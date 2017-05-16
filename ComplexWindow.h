@@ -14,12 +14,6 @@
 
 #pragma once
 
-#ifdef _POSIX_VERSION
-#include <pthread.h>
-#else
-#include <process.h>
-#endif
-
 class ComplexWindow
 {
 public:

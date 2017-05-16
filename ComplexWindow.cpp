@@ -12,23 +12,14 @@
 * THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#define NCURSES_INTERNALS 1 //Need to see some of the internals.
+
 #include "Fudge.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#ifdef _POSIX_VERSION
-#include <termios.h>
-#else
-#include <windows.h>
-#include <process.h>
-#endif
-
-
-#include "GPIO.h"
 #include "Button.h"
 #include "ComplexWindow.h"
+#include "GPIO.h"
 #include "Dummy-Panel.h"
-
 
 
 ComplexWindow::ComplexWindow(int height, int width, int starty, int startx)
