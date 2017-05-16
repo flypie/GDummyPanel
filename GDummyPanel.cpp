@@ -75,16 +75,19 @@ typedef struct ThreadDataT
 
 typedef enum
 {
-    MACHINEDESC = 0,
-    PINSTOPANEL = 1,
-    READREQ = 2,
-    PINCOUNT = 3,
-    ENABLEMAP = 4,
-    INPUTMAP = 5,
-    OUTPUTMAP = 6,
-    PINSTOQEMU = 7
+    PROTOCOLDESCFROMQEMU = 0,
+    PROTOCOLDESCFROMPANEL = 1,
+    PINSTOPANEL = 2,
+    READREQ = 3,
+    PINCOUNT = 4,
+    ENABLEMAP = 5,
+    INPUTMAP = 6,
+    OUTPUTMAP = 7,
+    PINSTOQEMU = 8
 } PacketType;
 
+#define MYMAXPROTOCOL   0
+#define MYMINPROTOCOL   0
 
 typedef struct
 {
@@ -106,6 +109,7 @@ short color_table[] =
     COLOR_RED, COLOR_MAGENTA, COLOR_YELLOW, COLOR_WHITE
 };
 
+int ProtocolInUse= -1;
 
 uint64_t EnabledMask = 0xFFFFFFFF;
 uint64_t InputMask;
@@ -204,9 +208,47 @@ void SendPinStates(ThreadData *TData)
     log_win->printw("Pin States Sent.\n");
 }
 
+
+void SendProtocol(ThreadData *TData)
+{
+    CommandPacket	Send;
+
+    Send.Data[PACKETLEN] = sizeof(Send.Data[0]) * 3;
+    Send.Data[PACKETTYPE] = PROTOCOLDESCFROMPANEL;
+
+    Send.Data[2] = (unsigned short)ProtocolInUse;
+
+    send(TData->ClientSocket, (char *)&Send, Send.Data[PACKETLEN], 0);
+
+    log_win->printw("SendProtocol Sent.\n");
+}
+
+
+void SetProtocol(ThreadData *TData, CommandPacket	*CurrentPkt)
+{
+    int QMinP,QMaxP;
+    int CMinP, CMaxP;
+
+    QMinP = CurrentPkt->Data[2];
+    QMaxP = CurrentPkt->Data[3];
+
+    CMaxP = min(QMaxP, MYMAXPROTOCOL);
+    CMinP = max(QMinP, MYMINPROTOCOL);
+
+    if (CMaxP >= CMinP) {
+        ProtocolInUse = CMaxP;
+        log_win->printw("Protocol Agreed %d\n", ProtocolInUse);
+    }
+    else {
+        ProtocolInUse = -1;
+        log_win->printw("No Common Protocol\n");
+    }
+    SendProtocol(TData);
+}
+
 void SetPinCount(ThreadData *TData, CommandPacket	*CurrentPkt)
 {
-    int Count =
+    int Count;
 
     Count = CurrentPkt->Data[2];
 
@@ -388,7 +430,8 @@ DWORD WINAPI SlaveThread(LPVOID lpParam)
 
                 for (int i = 0; i < iResult; i += CurrentPkt->Data[PACKETLEN], CurrentPkt = (CommandPacket *)((char *)CurrentPkt + (CurrentPkt->Data[PACKETLEN]))) {
                     switch (CurrentPkt->Data[PACKETTYPE]) {
-                    case MACHINEDESC:
+                    case PROTOCOLDESCFROMQEMU:
+                        SetProtocol(TData, CurrentPkt);
                         break;
 
                     case PINSTOPANEL:
