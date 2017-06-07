@@ -14,30 +14,41 @@
 
 #pragma once
 
-class ComplexWindow
+class ComplexWindow: public GPanelObject
 {
 public:
 	ComplexWindow();
 	ComplexWindow(int height, int width, int starty, int startx);
 
 	~ComplexWindow();
-	void	addbox();
-	void	add_button(Button *In);
-	Button	*find_button(int x, int y);
-	Button	*find_button_data(int data);
-	void	removebox();
+
+    void	add_object(WindowObject *In);
+    WindowObject	*find_object(int x, int y);
+    WindowObject	*find_object_handle(int data);
+    void	DeleteObjects(size_t Type,int Num);
+
 	void	complexresize(int height, int width);
 	void	mvwin(int height);
 	void	DoSpinner();
 	int     _getch();
-	void	Display();
+    bool    HandleEvent(EVENTTYPE A,MEVENT &event);
 	void	refresh();
 	void	printw(const char *, ...);
-	void	DeleteButtons();
+
+    WINDOW  *GetInner() { return Inner; };
+    WINDOW  *GetWindow() { return Inner; };
+
+    void    Draw();
+    void    Touchln(int x, int y);
+
 private:
-	WINDOW  *Outer;
 	WINDOW  *Inner;
 
-	Button *ButtonList;
+    WindowObject *ObjectList;
+
+    char    **StrArr;
+    int     Pos;
+
+ 
 };
 

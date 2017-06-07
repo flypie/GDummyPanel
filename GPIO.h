@@ -25,6 +25,8 @@ public:
 	void SetStatus(int i, bool StatusIn, bool FromPanel);
 	bool NeedSending();
 
+    static  GPIO *GPIOs;
+
 protected:
 	friend void SendPinStates(struct ThreadDataT *TData);
 

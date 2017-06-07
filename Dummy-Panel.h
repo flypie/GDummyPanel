@@ -17,10 +17,15 @@
 
 
 extern	ComplexWindow   *log_win;
+extern	ComplexWindow   *panel_win;
 
 extern  bool    GlobalExit;
 
-extern	GPIO *GPIOs;
+//extern	GPIO *GPIOs;
+
+//extern  WINDOW	*Master;
+
+
 
 
 #endif	/* _welcome_H */

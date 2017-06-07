@@ -16,96 +16,78 @@
 
 #include "Fudge.h"
 
+#include "GPanelObject.h"
+
 #include "Button.h"
+#include "NumBox.h"
 #include "ComplexWindow.h"
 #include "GPIO.h"
 #include "Dummy-Panel.h"
 
+#include <typeinfo>
 
 ComplexWindow::ComplexWindow(int height, int width, int starty, int startx)
 {
-    Outer = newwin(height, width, starty, startx);
-
-    Inner = newwin(height - 3, width - 2, starty + 1, startx + 1);
+    Inner = newwin(height, width, starty,startx);
     wrefresh(Inner);		/* Show that box 		*/
 
-    addbox();
+    rectangle(Inner, 0, 0, height - 1, width - 1);
 
-    nodelay(Outer, TRUE);
     nodelay(Inner, TRUE);
 
     keypad(Inner, TRUE);
 
-    ButtonList = NULL;
+    ObjectList = NULL;
 
     scrollok(Inner, TRUE);
+
+    StrArr = new char*[height-2];
+    Pos = 0;
 }
 
 ComplexWindow::~ComplexWindow()
 {
-    /* box(local_win, ' ', ' '); : This won't produce the desired
-    * result of erasing the window. It will leave it's four corners
-    * and so an ugly remnant of window.
-    */
-
     wrefresh(Inner);
     delwin(Inner);
 
-    removebox();
-
-    wrefresh(Outer);
-    delwin(Outer);
+    delete StrArr;
 }
 
-
-
-void ComplexWindow::addbox()
+void ComplexWindow::add_object(WindowObject *In)
 {
-    LOCKMUTEX
+    WindowObject	*Cur;
+    LOCKMUTEX(curseslock);
 
-    box(Outer, 0, 0);
-
-    wrefresh(Outer);		/* Show that box */
-    
-    UNLOCKMUTEX    
-}
-
-
-void ComplexWindow::add_button(Button *In)
-{
-    Button	*Cur;
-    LOCKMUTEX
-
-    if (!ButtonList) {
-        ButtonList = In;
+    if (!ObjectList) {
+        ObjectList = In;
     }
     else {
-        Cur = ButtonList;
+        Cur = ObjectList;
         while (Cur->Next != 0) {
             Cur = Cur->Next;
         };
         Cur->Next = In;
     }
 
-    UNLOCKMUTEX    
+    UNLOCKMUTEX(curseslock);
 }
 
-Button *ComplexWindow::find_button(int x, int y)
+WindowObject *ComplexWindow::find_object(int x, int y)
 {
-    Button	*Cur = NULL;
+    WindowObject	*Cur = NULL;
     bool	NotFound = true;
 
-    LOCKMUTEX
+    LOCKMUTEX(curseslock);
 
-    if (!ButtonList) {
+    if (!ObjectList) {
     }
     else {
-        Cur = ButtonList;
+        Cur = ObjectList;
 
         if (x >= Cur->x &&
             y >= Cur->y &&
-            x < Cur->x + Cur->w - 1 &&
-            y < Cur->y + Cur->h - 1) {
+            x < Cur->x + Cur->w &&
+            y < Cur->y + Cur->h) {
             NotFound = FALSE;
         }
         else {
@@ -113,8 +95,8 @@ Button *ComplexWindow::find_button(int x, int y)
                 Cur = Cur->Next;
                 if (x >= Cur->x &&
                     y >= Cur->y &&
-                    x < Cur->x + Cur->w - 1 &&
-                    y < Cur->y + Cur->h - 1) {
+                    x < Cur->x + Cur->w &&
+                    y < Cur->y + Cur->h) {
                     NotFound = FALSE;
                 }
             }
@@ -125,22 +107,22 @@ Button *ComplexWindow::find_button(int x, int y)
         Cur = NULL;
     }
 
-    UNLOCKMUTEX    
+    UNLOCKMUTEX(curseslock);
 
     return Cur;
 }
 
-Button *ComplexWindow::find_button_data(int data)
+WindowObject *ComplexWindow::find_object_handle(int Handle)
 {
-    Button	*Cur = NULL;
+    WindowObject	*Cur = NULL;
     bool	NotFound = true;
 
-    LOCKMUTEX
+    LOCKMUTEX(curseslock);
 
-    Cur = ButtonList;
+    Cur = ObjectList;
 
     while (Cur != 0 && NotFound) {
-        if (data == Cur->iData) {
+        if (Handle == Cur->Handle) {
             NotFound = FALSE;
         }
         else {
@@ -148,71 +130,81 @@ Button *ComplexWindow::find_button_data(int data)
         }
     }
 
-    UNLOCKMUTEX    
+    UNLOCKMUTEX(curseslock);
 
     return Cur;
 }
 
-void ComplexWindow::DeleteButtons()
+void ComplexWindow::DeleteObjects(size_t Type,int Num)
 {
-    Button	*Cur, *Del;
+    WindowObject	*Cur, *Del;
 
-    LOCKMUTEX
+    LOCKMUTEX(curseslock);
 
-    Cur = ButtonList;
-    while (Cur != 0) {
-        Del = Cur;
-        Cur = Cur->Next;
+    if (Num == -1) {
+        Cur = ObjectList;
+        while (Cur != 0) {
+            if (Type == typeid(*Cur).hash_code()) {
+                if (Cur == ObjectList) {
+                    ObjectList = Cur->Next;
+                }
+                Del = Cur;
+                Cur = Cur->Next;
 
-        delete Del;
-    };
-    ButtonList = NULL;
-    
-    UNLOCKMUTEX    
-}
+                delete Del;
+            }
+            else {
+                Cur = Cur->Next;
+            }
+        };
+    }
+    else{
+        for (int i = 0; i < Num; i++) {
+            Cur = ObjectList;
+            Del = 0;
+            WindowObject *TPrev = 0;
+            WindowObject *Prev = 0;
 
-void ComplexWindow::removebox()
-{
-    LOCKMUTEX
+            while (Cur != 0) {
+                if (Type == typeid(*Cur).hash_code()) {
+                    Prev = TPrev;
+                    Del = Cur;
+                }
+                TPrev = Cur;
+                Cur = Cur->Next;
+            };
 
-    wborder(Outer, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-    /* The parameters taken are
-    * 1. win: the window on which to operate
-    * 2. ls: character to be used for the left side of the window
-    * 3. rs: character to be used for the right side of the window
-    * 4. ts: character to be used for the top side of the window
-    * 5. bs: character to be used for the bottom side of the window
-    * 6. tl: character to be used for the top left corner of the window
-    * 7. tr: character to be used for the top right corner of the window
-    * 8. bl: character to be used for the bottom left corner of the window
-    * 9. br: character to be used for the bottom right corner of the window
-    */
+            if (Del) {
+                if (Del == ObjectList) {
+                    ObjectList = Del->Next;
+                }
+                else {
+                    Prev->Next = Del->Next;
+                }
+                delete Del;
+            }
+        }
+    }
 
-    UNLOCKMUTEX    
+    UNLOCKMUTEX(curseslock);
 }
 
 void ComplexWindow::complexresize(int height, int width)
 {
-    LOCKMUTEX
+    LOCKMUTEX(curseslock);
 
-    wresize(Outer, height, width);
-    wresize(Inner, height - 2, width - 2);
-    wclear(Outer);
-    addbox();
-    wrefresh(Outer);
-    wrefresh(Inner);
-
-    UNLOCKMUTEX    
+    wresize(Inner, height, width);
+    rectangle(Inner, Inner->_begy, Inner->_begx, Inner->_begy + height - 1, Inner->_begx + width - 1);    wrefresh(Inner);
+    UNLOCKMUTEX(curseslock);
 }
 
 void ComplexWindow::mvwin(int height)
 {
-    LOCKMUTEX
+    LOCKMUTEX(curseslock);
 
-    ::mvwin(Outer, height / 2, 0);
-    ::mvwin(Inner, height / 2 + 1, 1);
+    ::mvwin(Inner, height / 2 , 0);
 
-    UNLOCKMUTEX    
+    UNLOCKMUTEX(curseslock);
 
 }
 
@@ -220,53 +212,66 @@ void ComplexWindow::DoSpinner()
 {
     static int count = 0;
 
-    LOCKMUTEX
+    LOCKMUTEX(curseslock);
 
     count++;
 
-    wmove(Outer, 0, 0);
+    wmove(Inner, 0, 0);
 
-    wattron(Outer, COLOR_PAIR(count % 8));
+    wattron(Inner, COLOR_PAIR(2+count % 6));
 
     switch (count % 4) {
     case 0:
-        wprintw(Outer, "|");
+        wprintw(Inner, "|");
         break;
     case 1:
-        wprintw(Outer, "\\");
+        wprintw(Inner, "\\");
         break;
     case 2:
-        wprintw(Outer, "-");
+        wprintw(Inner, "-");
         break;
     case 3:
-        wprintw(Outer, "/");
+        wprintw(Inner, "/");
         break;
     }
 
-    wattroff(Outer, COLOR_PAIR(count % 8));
-    wrefresh(Outer);
+    wattroff(Inner, COLOR_PAIR(count % 8));
+    wrefresh(Inner);
 
-    UNLOCKMUTEX    
+    UNLOCKMUTEX(curseslock);
+}
+
+void ComplexWindow::Draw()
+{
+    WindowObject *Obj = ObjectList;
+
+    while (Obj != NULL) {
+        if (Button *But = dynamic_cast<Button*>(Obj)) {
+            But->Draw();
+        }
+        else if (NumBox *NumB = dynamic_cast<NumBox*>(Obj)) {
+            NumB->Draw();
+        }
+        Obj = Obj->Next;
+    }
 }
 
 int ComplexWindow::_getch()
 {
     int val;
-    LOCKMUTEX
+    LOCKMUTEX(curseslock);
 
-    val=wgetch(Inner);
+    val = wgetch(Inner);
 
-    UNLOCKMUTEX    
+    UNLOCKMUTEX(curseslock);
     return val;
 }
 
-void ComplexWindow::Display()
+bool ComplexWindow::HandleEvent(EVENTTYPE c, MEVENT &event)
 {
-    MEVENT event;
-    int c;
-    LOCKMUTEX
+    bool Handled = false;
 
-    c = wgetch(Inner);
+    LOCKMUTEX(curseslock);
 
     switch (c) {
     case KEY_MOUSE:
@@ -278,37 +283,39 @@ void ComplexWindow::Display()
             /* When the user clicks left mouse button */
             if (event.x >= Inner->_begx &&
                 event.y >= Inner->_begy &&
-                event.x < Inner->_maxx &&
-                event.y < Inner->_maxy
+                event.x <= Inner->_begx + Inner->_maxx &&
+                event.y <= Inner->_begy + Inner->_maxy
                 ) { //We are in the window
                 if (event.bstate & BUTTON1_DOUBLE_CLICKED || event.bstate & BUTTON1_CLICKED) {
-                    Button *But;
-                    But = find_button(event.x, event.y);
+                    WindowObject *Obj;
+                    Obj = find_object(event.x- Inner->_begx, event.y-Inner->_begy);
+                    if (Obj) {
+                        MEVENT LEvent = event;
+                        LEvent.x = event.x - Inner->_begx;
+                        LEvent.y = event.y - Inner->_begy;
 
-                    if (But && !But->Out && But->Enabled) {
-                        But->SetInput(true);
-                        But->Selected = !But->Selected;
-                        But->draw();
-
-                        GPIOs->SetStatus(But->iData, But->Selected, true);
-
-                        log_win->printw("Mouse: X %d Y %d Id %s\n", event.x, event.y, But->Text);
-                        log_win->refresh();
+                        if (Button *But = dynamic_cast<Button*>(Obj)) {
+                            Handled = But->HandleEvent(c,LEvent);
+                        }
+                        else if (NumBox *NumB = dynamic_cast<NumBox*>(Obj)) {
+                            Handled = NumB->HandleEvent(c,LEvent);
+                        }
                     }
                 }
             }
             else {
-                log_win->printw("Not in WIndow\n");
-                log_win->refresh();
             }
         }
         break;
+
     case 'X':
     case 'x':
         log_win->printw("KEY_CODE_YES\n");
         log_win->refresh();
         GlobalExit = true;
+        Handled = true;
         break;
+
     case ERR:
         //		wprintw(log_win->Inner, choice);
         break;
@@ -317,16 +324,26 @@ void ComplexWindow::Display()
         break;
     }
 
-    UNLOCKMUTEX    
+    UNLOCKMUTEX(curseslock);
+
+    return Handled;
 }
 
 void ComplexWindow::refresh()
 {
-    LOCKMUTEX
+    LOCKMUTEX(curseslock);
 
+//    wrefresh(Outer);
     wrefresh(Inner);
 
-    UNLOCKMUTEX    
+    WindowObject *Obj = ObjectList;
+
+    while (Obj != NULL) {
+        Obj->Refresh();
+        Obj = Obj->Next;
+    }
+
+    UNLOCKMUTEX(curseslock);
 
 }
 
@@ -336,11 +353,55 @@ void ComplexWindow::printw(const char *format, ...)
     va_list args;
     va_start(args, format);
 
-    LOCKMUTEX
+    LOCKMUTEX(curseslock);
+
+    wattrset(Inner, CURSESWHITEONBLACK);
 
     vsprintf(buffer, format, args);
-    ::wprintw(Inner, buffer);
-    va_end(args);
 
-    UNLOCKMUTEX    
+    if (Pos == Inner->_maxy - 2) {
+        delete StrArr[0];
+        for (int i = 1; i < Pos; i++) {
+            StrArr[i - 1] = StrArr[i];
+        }
+        Pos--;
+    }
+    StrArr[Pos] = new char[strlen(buffer)+1];
+    strcpy(StrArr[Pos++],buffer);
+
+    for (int i = 0; i < Pos; i++) {
+        mvwaddnstr(Inner, i + 1, 1, StrArr[i], strlen(StrArr[i]));
+        wclrtoeol(Inner);
+    }
+    
+    wmove(Inner, 1, Inner->_maxx - 1);
+    wvline(Inner, 0, Pos);
+
+    UNLOCKMUTEX(curseslock);
+
+    va_end(args);
+}
+
+void ComplexWindow::Touchln(int y, int numy)
+{
+    WindowObject	*Cur = NULL;
+    bool	NotFound = true;
+
+    LOCKMUTEX(curseslock);
+
+    wtouchln(Inner,y,numy,true);
+
+    Cur = ObjectList;
+/*
+    while (Cur) {
+        int a = max(Cur->y, y);
+        int b = min(Cur->y + Cur->h, y + numy);
+
+        if (a <= b) {
+            touchwin(Cur->Win);
+        }
+        Cur = Cur->Next;
+    }
+*/
+    UNLOCKMUTEX(curseslock);
 }

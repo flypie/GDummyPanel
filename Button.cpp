@@ -14,72 +14,30 @@
 
 #include "Fudge.h"
 
+#include "GPanelObject.h"
 #include "Button.h"
+#include "ComplexWindow.h"
+#include "GPIO.h"
+#include "Dummy-Panel.h"
+
+int Button::NumObjects = 0;
 
 Button::Button()
 {
-    Next = NULL;
-    Out = false;
-    In = false;
-    Enabled = true;
-
-    BG = new char[10];
-    strcpy(BG, "  ");
-    Text = new char[10];
+    NumObjects++;
 }
 
-Button::Button(int inx, int  iny, int  inh, int  inw, int  ini):Button()
+Button::Button(ComplexWindow *PWin, int inx, int  iny, int  inw, int  inh,int ini):WindowObject(PWin,inx, iny, inw, inh)
 {
-    Button(); // Call the basic constructor.
-
-    x = inx;
-    y = iny;
-    h = inh;
-    w = inw;
-    iData = ini;
-   
-    LOCKMUTEX
-        
-    Win = newwin(h, w, y, x);
-
-    box(Win, 0, 0);
-
-    UNLOCKMUTEX
-        
-    snprintf(Text, 10, "%03d", iData);
-
+    Value = ini;
+    snprintf(Text, 10, "%03d", Value);
+    NumObjects++;
 }
 
-void Button::draw()
+Button::~Button()
 {
-    LOCKMUTEX
-       
-    if (Selected) {
-        if (Out) {
-            wattron(Win, COLOR_PAIR(4) | A_REVERSE);
-        }
-        else {
-            wattron(Win, COLOR_PAIR(2) | A_REVERSE);
-        }
-    }
-
-    wmove(Win, 1, 1);
-    wprintw(Win, BG);
-
-    wmove(Win, 1, 1 + ((w - 2) - (int)strlen(Text)) / 2);
-    wprintw(Win, Text);
-
-    if (Selected) {
-        wattroff(Win, A_REVERSE);
-    }
-
-    wattron(Win, COLOR_PAIR(7));
-
-    wrefresh(Win);
-    
-    UNLOCKMUTEX
+    NumObjects--;
 }
-
 
 void Button::SetSelected(bool In)
 {
@@ -90,19 +48,21 @@ void Button::SetSelected(bool In)
 void Button::SetOutput(bool In)
 {
     Out = In;
-
+/*
     LOCKMUTEX
-           wattron(Win, COLOR_PAIR(4) | A_REVERSE);
+    
+    wattron(Win, COLOR_PAIR(4) | A_REVERSE);
     box(Win, 0, 0);
     wattroff(Win, COLOR_PAIR(4) | A_REVERSE);
 
     UNLOCKMUTEX
+*/
 }
 
 void Button::SetInput(bool InIn)
 {
     In = InIn;
-
+/*
     LOCKMUTEX
         
     wattron(Win, COLOR_PAIR(2) | A_REVERSE);
@@ -110,11 +70,13 @@ void Button::SetInput(bool InIn)
     wattroff(Win, COLOR_PAIR(2) | A_REVERSE);
 
     UNLOCKMUTEX     
+*/
 }
 
 void Button::SetEnabled(bool InIn)
 {
     Enabled = InIn;
+/*
 
     if (!Enabled) {
         LOCKMUTEX
@@ -125,6 +87,7 @@ void Button::SetEnabled(bool InIn)
     
         UNLOCKMUTEX
     }
+*/
 }
 
 
@@ -138,7 +101,19 @@ bool Button::GetSelected()
     return Selected;
 }
 
-int Button::GetiData()
+bool Button::HandleEvent(EVENTTYPE A, MEVENT &event)
 {
-    return iData;
+    if (!Out && Enabled) {
+        SetInput(true);
+        Selected = !Selected;
+        
+        Draw();
+
+        GPIO::GPIOs->SetStatus(GetIntValue(), Selected, true);
+
+        log_win->printw("Button:Mouse: X %d Y %d Id %s", event.x, event.y, Text);
+        log_win->refresh();
+    }
+
+    return true; /* We Have Handled it */
 }

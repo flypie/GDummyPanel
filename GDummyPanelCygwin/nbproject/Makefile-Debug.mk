@@ -37,8 +37,14 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/83ecf3c1/Button.o \
 	${OBJECTDIR}/_ext/83ecf3c1/ComplexWindow.o \
+	${OBJECTDIR}/_ext/83ecf3c1/Fudge.o \
 	${OBJECTDIR}/_ext/83ecf3c1/GDummyPanel.o \
-	${OBJECTDIR}/_ext/83ecf3c1/GPIO.o
+	${OBJECTDIR}/_ext/83ecf3c1/GPIO.o \
+	${OBJECTDIR}/_ext/83ecf3c1/GPanel.o \
+	${OBJECTDIR}/_ext/83ecf3c1/GPanelObject.o \
+	${OBJECTDIR}/_ext/83ecf3c1/NumBox.o \
+	${OBJECTDIR}/_ext/83ecf3c1/StringEditWin.o \
+	${OBJECTDIR}/_ext/83ecf3c1/WindowObject.o
 
 
 # C Compiler Flags
@@ -77,6 +83,11 @@ ${OBJECTDIR}/_ext/83ecf3c1/ComplexWindow.o: /cygdrive/C/cygwin64/home/John-Bradl
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/83ecf3c1/ComplexWindow.o /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/ComplexWindow.cpp
 
+${OBJECTDIR}/_ext/83ecf3c1/Fudge.o: /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/Fudge.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/83ecf3c1
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/83ecf3c1/Fudge.o /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/Fudge.cpp
+
 ${OBJECTDIR}/_ext/83ecf3c1/GDummyPanel.o: /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/GDummyPanel.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/83ecf3c1
 	${RM} "$@.d"
@@ -86,6 +97,31 @@ ${OBJECTDIR}/_ext/83ecf3c1/GPIO.o: /cygdrive/C/cygwin64/home/John-Bradley/GDummy
 	${MKDIR} -p ${OBJECTDIR}/_ext/83ecf3c1
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/83ecf3c1/GPIO.o /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/GPIO.cpp
+
+${OBJECTDIR}/_ext/83ecf3c1/GPanel.o: /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/GPanel.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/83ecf3c1
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/83ecf3c1/GPanel.o /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/GPanel.cpp
+
+${OBJECTDIR}/_ext/83ecf3c1/GPanelObject.o: /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/GPanelObject.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/83ecf3c1
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/83ecf3c1/GPanelObject.o /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/GPanelObject.cpp
+
+${OBJECTDIR}/_ext/83ecf3c1/NumBox.o: /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/NumBox.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/83ecf3c1
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/83ecf3c1/NumBox.o /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/NumBox.cpp
+
+${OBJECTDIR}/_ext/83ecf3c1/StringEditWin.o: /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/StringEditWin.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/83ecf3c1
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/83ecf3c1/StringEditWin.o /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/StringEditWin.cpp
+
+${OBJECTDIR}/_ext/83ecf3c1/WindowObject.o: /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/WindowObject.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/83ecf3c1
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/83ecf3c1/WindowObject.o /cygdrive/C/cygwin64/home/John-Bradley/GDummyPanel/WindowObject.cpp
 
 # Subprojects
 .build-subprojects:

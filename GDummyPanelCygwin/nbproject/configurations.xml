@@ -9,6 +9,11 @@
       <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/Dummy-Panel.h</itemPath>
       <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/Fudge.h</itemPath>
       <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/GPIO.h</itemPath>
+      <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/GPanel.h</itemPath>
+      <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/GPanelObject.h</itemPath>
+      <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/NumBox.h</itemPath>
+      <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/StringEditWin.h</itemPath>
+      <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/WindowObject.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -19,8 +24,14 @@
                    projectFiles="true">
       <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/Button.cpp</itemPath>
       <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/ComplexWindow.cpp</itemPath>
+      <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/Fudge.cpp</itemPath>
       <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/GDummyPanel.cpp</itemPath>
       <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/GPIO.cpp</itemPath>
+      <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/GPanel.cpp</itemPath>
+      <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/GPanelObject.cpp</itemPath>
+      <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/NumBox.cpp</itemPath>
+      <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/StringEditWin.cpp</itemPath>
+      <itemPath>C:/cygwin64/home/John-Bradley/GDummyPanel/WindowObject.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -77,6 +88,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/Fudge.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/Fudge.h"
             ex="false"
             tool="3"
@@ -93,6 +109,56 @@
             flavor2="0">
       </item>
       <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GPIO.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GPanel.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GPanel.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GPanelObject.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GPanelObject.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/NumBox.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/NumBox.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/StringEditWin.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/StringEditWin.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/WindowObject.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/WindowObject.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -143,6 +209,11 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/Fudge.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/Fudge.h"
             ex="false"
             tool="3"
@@ -159,6 +230,56 @@
             flavor2="0">
       </item>
       <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GPIO.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GPanel.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GPanel.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GPanelObject.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/GPanelObject.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/NumBox.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/NumBox.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/StringEditWin.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/StringEditWin.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/WindowObject.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="C:/cygwin64/home/John-Bradley/GDummyPanel/WindowObject.h"
             ex="false"
             tool="3"
             flavor2="0">

@@ -111,15 +111,26 @@
   <ItemGroup>
     <ClCompile Include="Button.Cpp" />
     <ClCompile Include="ComplexWindow.cpp" />
+    <ClCompile Include="Fudge.cpp" />
     <ClCompile Include="GDummyPanel.cpp" />
+    <ClCompile Include="GPanel.cpp" />
+    <ClCompile Include="GPanelObject.cpp" />
     <ClCompile Include="GPIO.cpp" />
+    <ClCompile Include="NumBox.cpp" />
+    <ClCompile Include="StringEditWin.cpp" />
+    <ClCompile Include="WindowObject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h" />
     <ClInclude Include="ComplexWindow.h" />
     <ClInclude Include="Dummy-Panel.h" />
     <ClInclude Include="Fudge.h" />
+    <ClInclude Include="GPanel.h" />
+    <ClInclude Include="GPanelObject.h" />
     <ClInclude Include="GPIO.h" />
+    <ClInclude Include="NumBox.h" />
+    <ClInclude Include="StringEditWin.h" />
+    <ClInclude Include="WindowObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

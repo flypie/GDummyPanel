@@ -16,6 +16,8 @@
 
 #include "GPIO.h"
 
+GPIO *GPIO::GPIOs = NULL;
+
 GPIO::GPIO(int Size)
 {
     NeedsSend = true;

@@ -18,7 +18,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef _POSIX_VERSION
+#if defined(_POSIX_VERSION) || defined(_POSIX2_C_VERSION)
 #include <termios.h>
 #include <pthread.h>
 #include <string.h>
@@ -32,6 +32,7 @@
 #endif
 
 #include "curses.h"
+#include <panel.h>
 
 #ifdef _POSIX_VERSION
 
@@ -43,18 +44,61 @@
 #define SOCKET_ERROR -1
 #define WSAGetLastError() errno 
 
-extern pthread_mutex_t lock; //NCurses not thread  safe/
+extern pthread_mutex_t curseslock; //NCurses not thread  safe/
+extern pthread_mutex_t threadlock; //NCurses not thread  safe/
 
-#define LOCKMUTEX   pthread_mutex_lock(&lock);
-#define UNLOCKMUTEX pthread_mutex_unlock(&lock);
+#define LOCKMUTEX(x)   pthread_mutex_lock(&x);
+#define UNLOCKMUTEX(x) pthread_mutex_unlock(&x);
 #else
 
-extern HANDLE  lock; //NCurses not thread  safe/
+extern HANDLE  curseslock; //NCurses not thread  safe/
 
-#define LOCKMUTEX   WaitForSingleObject(lock, 0xFFFFFFFF );
-#define UNLOCKMUTEX ReleaseMutex(lock);
+/* No ; so as not to mess up VisC auto format*/
+
+#define LOCKMUTEX(x)   WaitForSingleObject(x, 0xFFFFFFFF )
+#define UNLOCKMUTEX(x) ReleaseMutex(x)
 
 #endif
+
+#define CURSESWHITEONBLACK    COLOR_PAIR(0)
+#define CURSESBLACKONWHITE    COLOR_PAIR(1)
+
+#define REDONBLACK      COLOR_PAIR(2)
+#define GREENONBLACK    COLOR_PAIR(3)
+#define BLUEONBLACK     COLOR_PAIR(4)
+#define CYANONBLACK     COLOR_PAIR(5)
+#define MAGENTAONBLACK  COLOR_PAIR(6)
+#define YELLLOWONBLACK  COLOR_PAIR(7)
+
+#define BLACKONRED      COLOR_PAIR(8)
+#define BLACKONGREEN      COLOR_PAIR(9)
+#define BLACKONBLUE      COLOR_PAIR(10)
+#define BLACKONCYAN      COLOR_PAIR(11)
+#define BLACKONMAGENTA      COLOR_PAIR(12)
+#define BLACKONYELLOW      COLOR_PAIR(13)
+
+#define REDONWHITE      COLOR_PAIR(14)
+#define GREENONWHITE      COLOR_PAIR(15)
+#define BLUEONWHITE      COLOR_PAIR(16)
+#define CYANONWHITE      COLOR_PAIR(17)
+#define MAGENTAONWHITE      COLOR_PAIR(18)
+#define YELLLOWONWHITE      COLOR_PAIR(19)
+
+#define WHITEONRED      COLOR_PAIR(20)
+#define WHITEONGREEN      COLOR_PAIR(21)
+#define WHITEONBLUE      COLOR_PAIR(22)
+#define WHITEONCYAN      COLOR_PAIR(23)
+#define WHITEONMAGENTA      COLOR_PAIR(24)
+#define WHITEONYELLOW      COLOR_PAIR(25)
+
+
+typedef int EVENTTYPE;
+
+#define MAXSTRLEN  256
+
+extern void rectangle(WINDOW *Win, int y1, int x1, int y2, int x2);
+extern char *padstr(char *s, int length);
+extern void colorbox(WINDOW *win, chtype color, int hasbox);
 
 #endif /* FUDGE_H */
 

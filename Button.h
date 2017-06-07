@@ -14,40 +14,45 @@
 
 #pragma once
 
+#include "WindowObject.h"
 
-class Button
+class Button : public WindowObject
 {
-	friend class ComplexWindow;
-
 public:
 	Button();
-	Button(int inx, int  iny, int  inw, int  inh, int  ini);
+	Button(ComplexWindow *PWin, int inx, int  iny, int  inw, int  inh,int ini) ;
 
+    ~Button();
 
-	void draw();
+//  void draw();
 	void SetSelected(bool In);
 
 	void SetOutput(bool In);
 	void SetInput(bool In);
 	void SetEnabled(bool In);
 
-	bool GetSelected();
-	bool	GetOut();
-	int		GetiData();
+	bool    GetSelected();
+	bool    GetOut();
+    
+    int		GetIntValue() {
+        return Value;
+    };
+
+    void SetIntValue(int A) {
+        Value = A;
+    };
+
+    static int GetNumObjects() {
+        return NumObjects;
+    };
+
+    bool HandleEvent(EVENTTYPE A, MEVENT &event);
 
 private:
 
-	int		x, y, w, h;
-	char	*Text;
-	char	*BG;
-	bool	Selected;
-	Button *Next;
-	int		iData;
-	WINDOW	*Win;
+	int		Value;
 
-	bool	Out;
-	bool	In;
-	bool	Enabled;
+    static int NumObjects;
 };
 
 
