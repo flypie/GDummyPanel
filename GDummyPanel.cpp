@@ -185,10 +185,11 @@ char mygetch(void)
 void CreateButtons(int Num)
 {
     for (int i = 0; i < Num; i++) {
+        int BIndex = Button::GetNumObjects();
         Button *But = new Button(panel_win, MYBUTTONWIDTH * (Button::GetNumObjects() % BUTTONSPERROW), (Button::GetNumObjects() / BUTTONSPERROW) * MYBUTTONHEIGHT, MYBUTTONWIDTH, MYBUTTONHEIGHT, Button::GetNumObjects());
-        ButtonHandles[i] = But->GetHandle();
-        But->SetIntValue(Button::GetNumObjects());
-        But->SetSelected(GPIO::GPIOs->GetStatus(Button::GetNumObjects()));
+        ButtonHandles[BIndex] = But->GetHandle();
+        But->SetIntValue(BIndex);
+        But->SetSelected(GPIO::GPIOs->GetStatus(BIndex));
         panel_win->add_object(But);
     }
 }
@@ -692,8 +693,6 @@ int main(int argc, char**argv)
     Master = initscr();
 #endif
 
-    GPIO::GPIOs = new GPIO(MAXBUTTONS);
-
     if (Master) {
         nodelay(stdscr, TRUE);
         keypad(stdscr, TRUE);
@@ -734,6 +733,9 @@ int main(int argc, char**argv)
         update_panels();
 
         if (log_win&&panel_win) {
+
+            GPIO::GPIOs = new GPIO(MAXBUTTONS);
+
             CreateButtons(10);
             CreateNumBoxes(2);
             panel_win->Draw();
