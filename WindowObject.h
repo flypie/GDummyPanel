@@ -21,7 +21,7 @@ public:
     virtual void SetIntValue(int A) = 0;
 
 private:
-    struct _win	*Win;
+    WINDOW	*Win;
 
     bool	Selected;
     WindowObject *Next;

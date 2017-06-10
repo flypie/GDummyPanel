@@ -57,9 +57,14 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <ccTool>
+          <commandlineTool>g++</commandlineTool>
+          <commandLine>-std=gnu++14</commandLine>
+        </ccTool>
         <linkerTool>
           <linkerLibItems>
             <linkerLibFileItem>C:/cygwin64/lib/libncurses.a</linkerLibFileItem>
+            <linkerLibLibItem>panel</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>

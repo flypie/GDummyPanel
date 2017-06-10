@@ -38,8 +38,11 @@
 #include <unistd.h>
 #include <errno.h>
 #include <strings.h>
+#include <algorithm>    // std::max
 #else
 #endif
+
+using namespace std;
 
 #include "GPanelObject.h"
 
@@ -632,7 +635,7 @@ int main(int argc, char**argv)
     pthread_mutexattr_init(&Attr);
     pthread_mutexattr_settype(&Attr, PTHREAD_MUTEX_RECURSIVE);
 
-    pthread_mutex_init(&lcursesock, &Attr);
+    pthread_mutex_init(&curseslock, &Attr);
 #else
     curseslock = CreateMutex(
         NULL,              // default security attributes
@@ -645,11 +648,6 @@ int main(int argc, char**argv)
 #endif
 
 #ifdef _POSIX_VERSION
-    pthread_mutexattr_t Attr;
-
-    pthread_mutexattr_init(&Attr);
-    pthread_mutexattr_settype(&Attr, PTHREAD_MUTEX_RECURSIVE);
-
     pthread_mutex_init(&threadlock, &Attr);
 #else
     threadlock = CreateMutex(

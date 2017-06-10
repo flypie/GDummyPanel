@@ -51,8 +51,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-std=gnu++14
+CXXFLAGS=-std=gnu++14
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -61,7 +61,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=/cygdrive/C/cygwin64/lib/libncurses.a
+LDLIBSOPTIONS=/cygdrive/C/cygwin64/lib/libncurses.a -lpanel
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}

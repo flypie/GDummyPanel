@@ -7,9 +7,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <wchar.h>
+#include <wctype.h>
 
 #include "WindowObject.h"
 #include "StringEditWin.h"
+
+
+#ifndef PDCURSES
+
+#define _DWCHAR    0x17  /* Delete Word char (^W) */
+
+char wordchar(void)
+{
+    return _DWCHAR;         /* word delete char */
+}
+#endif
 
 StringEditWin::StringEditWin(WindowObject *WinObj, char *descIn, char *bufIn, int MaxLenIn)
 {
@@ -114,7 +127,7 @@ void    StringEditWin::Draw()
 #ifdef PDCURSES
     maxx = getmaxx(wedit);
 #else
-    getmaxyx(win, maxy, maxx);
+    getmaxyx(wedit, maxy, maxx);
 #endif
     werase(wedit);
     mvwprintw(wedit, 0, 0, "%s", padstr(Buffer, maxx));
@@ -209,7 +222,7 @@ bool StringEditWin::HandleEvent(EVENTTYPE c, MEVENT &event)
 
             memmove((void *)bp, (const void *)tp, strlen(tp) + 1);
         }
-        else if ((c < KEY_OFFSET || c > KEY_MAX) && iswprint(c) && (!Numeric || iswxdigit(c))) {
+        else if ((c < KEY_CODE_YES || c > KEY_MAX) && iswprint(c) && (!Numeric || iswxdigit(c))) {
             if (defdisp) {
                 bp = Buffer;
                 *bp = '\0';
