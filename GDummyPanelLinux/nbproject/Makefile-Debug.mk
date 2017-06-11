@@ -37,16 +37,22 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/5c0/Button.o \
 	${OBJECTDIR}/_ext/5c0/ComplexWindow.o \
+	${OBJECTDIR}/_ext/5c0/Fudge.o \
 	${OBJECTDIR}/_ext/5c0/GDummyPanel.o \
-	${OBJECTDIR}/_ext/5c0/GPIO.o
+	${OBJECTDIR}/_ext/5c0/GPIO.o \
+	${OBJECTDIR}/_ext/5c0/GPanel.o \
+	${OBJECTDIR}/_ext/5c0/GPanelObject.o \
+	${OBJECTDIR}/_ext/5c0/NumBox.o \
+	${OBJECTDIR}/_ext/5c0/StringEditWin.o \
+	${OBJECTDIR}/_ext/5c0/WindowObject.o
 
 
 # C Compiler Flags
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-std=gnu++14
+CXXFLAGS=-std=gnu++14
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -55,13 +61,11 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=/usr/lib/libncurses.a -lpthread-2.23
+LDLIBSOPTIONS=-lpthread-2.23 -lpanel -lncurses
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/gdummypanellinux
-
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/gdummypanellinux: /usr/lib/libncurses.a
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/gdummypanellinux: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
@@ -77,6 +81,11 @@ ${OBJECTDIR}/_ext/5c0/ComplexWindow.o: ../ComplexWindow.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5c0/ComplexWindow.o ../ComplexWindow.cpp
 
+${OBJECTDIR}/_ext/5c0/Fudge.o: ../Fudge.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/5c0
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5c0/Fudge.o ../Fudge.cpp
+
 ${OBJECTDIR}/_ext/5c0/GDummyPanel.o: ../GDummyPanel.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/5c0
 	${RM} "$@.d"
@@ -86,6 +95,31 @@ ${OBJECTDIR}/_ext/5c0/GPIO.o: ../GPIO.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/5c0
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5c0/GPIO.o ../GPIO.cpp
+
+${OBJECTDIR}/_ext/5c0/GPanel.o: ../GPanel.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/5c0
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5c0/GPanel.o ../GPanel.cpp
+
+${OBJECTDIR}/_ext/5c0/GPanelObject.o: ../GPanelObject.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/5c0
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5c0/GPanelObject.o ../GPanelObject.cpp
+
+${OBJECTDIR}/_ext/5c0/NumBox.o: ../NumBox.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/5c0
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5c0/NumBox.o ../NumBox.cpp
+
+${OBJECTDIR}/_ext/5c0/StringEditWin.o: ../StringEditWin.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/5c0
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5c0/StringEditWin.o ../StringEditWin.cpp
+
+${OBJECTDIR}/_ext/5c0/WindowObject.o: ../WindowObject.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/5c0
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/5c0/WindowObject.o ../WindowObject.cpp
 
 # Subprojects
 .build-subprojects:

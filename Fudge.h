@@ -31,7 +31,7 @@
 #undef MOUSE_MOVED
 #endif
 
-#include "curses.h"
+#include <curses.h>
 #include <panel.h>
 
 #ifdef _POSIX_VERSION

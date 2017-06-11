@@ -222,7 +222,7 @@ bool StringEditWin::HandleEvent(EVENTTYPE c, MEVENT &event)
 
             memmove((void *)bp, (const void *)tp, strlen(tp) + 1);
         }
-        else if ((c < KEY_CODE_YES || c > KEY_MAX) && iswprint(c) && (!Numeric || iswxdigit(c))) {
+        else if (c >=0 && c< 256 && isprint(c) && (!Numeric || iswxdigit(c))) {
             if (defdisp) {
                 bp = Buffer;
                 *bp = '\0';

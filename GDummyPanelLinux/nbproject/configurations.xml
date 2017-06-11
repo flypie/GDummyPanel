@@ -9,6 +9,11 @@
       <itemPath>../Dummy-Panel.h</itemPath>
       <itemPath>../Fudge.h</itemPath>
       <itemPath>../GPIO.h</itemPath>
+      <itemPath>../GPanel.h</itemPath>
+      <itemPath>../GPanelObject.h</itemPath>
+      <itemPath>../NumBox.h</itemPath>
+      <itemPath>../StringEditWin.h</itemPath>
+      <itemPath>../WindowObject.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -19,8 +24,14 @@
                    projectFiles="true">
       <itemPath>../Button.cpp</itemPath>
       <itemPath>../ComplexWindow.cpp</itemPath>
+      <itemPath>../Fudge.cpp</itemPath>
       <itemPath>../GDummyPanel.cpp</itemPath>
       <itemPath>../GPIO.cpp</itemPath>
+      <itemPath>../GPanel.cpp</itemPath>
+      <itemPath>../GPanelObject.cpp</itemPath>
+      <itemPath>../NumBox.cpp</itemPath>
+      <itemPath>../StringEditWin.cpp</itemPath>
+      <itemPath>../WindowObject.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -43,10 +54,14 @@
         <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
+        <ccTool>
+          <commandLine>-std=gnu++14</commandLine>
+        </ccTool>
         <linkerTool>
           <linkerLibItems>
-            <linkerLibFileItem>/usr/lib/libncurses.a</linkerLibFileItem>
             <linkerLibLibItem>pthread-2.23</linkerLibLibItem>
+            <linkerLibLibItem>panel</linkerLibLibItem>
+            <linkerLibLibItem>ncurses</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
@@ -60,6 +75,8 @@
       </item>
       <item path="../Dummy-Panel.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../Fudge.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../Fudge.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../GDummyPanel.cpp" ex="false" tool="1" flavor2="0">
@@ -67,6 +84,26 @@
       <item path="../GPIO.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../GPIO.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../GPanel.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../GPanel.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../GPanelObject.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../GPanelObject.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../NumBox.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../NumBox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../StringEditWin.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../StringEditWin.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../WindowObject.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../WindowObject.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
@@ -99,6 +136,8 @@
       </item>
       <item path="../Dummy-Panel.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="../Fudge.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="../Fudge.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../GDummyPanel.cpp" ex="false" tool="1" flavor2="0">
@@ -106,6 +145,26 @@
       <item path="../GPIO.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../GPIO.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../GPanel.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../GPanel.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../GPanelObject.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../GPanelObject.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../NumBox.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../NumBox.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../StringEditWin.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../StringEditWin.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../WindowObject.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../WindowObject.h" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>
