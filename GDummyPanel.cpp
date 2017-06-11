@@ -576,6 +576,7 @@ void HandleEvents()
     EVENTTYPE c;
     MEVENT event;
     GPanel *Cur;
+    bool    EveythingOK=true;
 
     LOCKMUTEX(curseslock);
 
@@ -588,13 +589,20 @@ void HandleEvents()
 #else
             if (nc_getmouse(&event) == OK) {
 #endif  
+                log_win->printw("Mouse Event");
+                EveythingOK=true;
             }
+        }
+        else
+        {
+            log_win->printw("Non Mouse Event"); 
+            EveythingOK=true;
         }
 
         bool Handled = false;
         GPanel *Cur = GPanel::List;
 
-        while (Cur && !Handled) {
+        while (EveythingOK && Cur && !Handled) {
             if (Cur->GetStop()) {
                 GPanel *Tmp;
                 Tmp = Cur->GetNext();

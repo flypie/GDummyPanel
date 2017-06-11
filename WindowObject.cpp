@@ -4,6 +4,7 @@
 #include "GPanelObject.h"
 #include "WindowObject.h"
 #include "ComplexWindow.h"
+#include "Dummy-Panel.h"
 
 int WindowObject::GHandle = 0;
 
@@ -73,6 +74,8 @@ void WindowObject::Draw()
 
     wmove(Win,y + 1,x + 1 + ((w - 2) - (int)strlen(Text)) / 2);
     wprintw(Win, Text);
+
+    wrefresh(Win);
 
     update_panels();
 

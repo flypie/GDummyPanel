@@ -54,17 +54,17 @@
       <toolsSet>
         <compilerSet>Cygwin|Cygwin</compilerSet>
         <dependencyChecking>true</dependencyChecking>
-        <rebuildPropChanged>false</rebuildPropChanged>
+        <rebuildPropChanged>true</rebuildPropChanged>
       </toolsSet>
       <compileType>
         <ccTool>
           <commandlineTool>g++</commandlineTool>
-          <commandLine>-std=gnu++14</commandLine>
+          <commandLine>-std=gnu++14 -ggdb3</commandLine>
         </ccTool>
         <linkerTool>
           <linkerLibItems>
-            <linkerLibFileItem>C:/cygwin64/lib/libncurses.a</linkerLibFileItem>
             <linkerLibLibItem>panel</linkerLibLibItem>
+            <linkerLibLibItem>ncurses</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
